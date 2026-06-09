@@ -66,7 +66,7 @@ export function ReviewForm({
       <button
         type="submit"
         disabled={busy || rating === 0}
-        className="self-start rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-800 disabled:opacity-50"
+        className="self-start rounded bg-accent px-4 py-2 text-sm text-white hover:bg-accent-deep disabled:opacity-50"
       >
         {initialBody ? "Update review" : "Post review"}
       </button>

@@ -77,7 +77,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       <button
         type="submit"
         disabled={busy}
-        className="rounded bg-emerald-700 py-2 text-white hover:bg-emerald-800 disabled:opacity-50"
+        className="rounded bg-accent py-2 text-white hover:bg-accent-deep disabled:opacity-50"
       >
         {mode === "signup" ? "Create account" : "Log in"}
       </button>

@@ -14,11 +14,11 @@ export const bookService = {
   // Everything the book page needs in one call: the book, its rating
   // aggregate, and its reviews. The three queries are independent, so they
   // run concurrently — total latency is max(), not sum().
-  async getBookPage(bookId: string) {
+  async getBookPage(bookId: string, viewerId: string | null) {
     const [book, stats, reviews] = await Promise.all([
       bookRepository.findByIdWithAuthors(bookId),
       bookRepository.getRatingStats(bookId),
-      reviewRepository.listForBook(bookId),
+      reviewRepository.listForBook(bookId, viewerId),
     ]);
     if (!book) throw new NotFoundError("Book not found");
     return { book, stats, reviews };

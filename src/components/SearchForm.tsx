@@ -13,7 +13,7 @@ export function SearchForm({ defaultValue = "" }: { defaultValue?: string }) {
       />
       <button
         type="submit"
-        className="rounded bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800"
+        className="rounded bg-accent px-4 py-2 text-white hover:bg-accent-deep"
       >
         Search
       </button>

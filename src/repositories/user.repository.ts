@@ -18,6 +18,34 @@ export const userRepository = {
     return prisma.user.findUnique({ where: { id } });
   },
 
+  findByUsername(username: string) {
+    return prisma.user.findUnique({ where: { username } });
+  },
+
+  // The people directory: every user plus relationship counts. _count maps
+  // to correlated COUNT subqueries — fine at directory scale; a denormalized
+  // follower_count column is the Phase 2 lesson if this ever gets hot.
+  listAll() {
+    return prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        bio: true,
+        avatarUrl: true,
+        _count: { select: { followers: true, reviews: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
+  listReviewsByUser(userId: string) {
+    return prisma.review.findMany({
+      where: { userId },
+      include: { book: true },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
   // Creating the user and their three system shelves in one nested create
   // makes signup atomic: either everything exists or nothing does.
   create(data: NewUser) {

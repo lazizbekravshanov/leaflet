@@ -8,7 +8,7 @@ export default function LoginPage() {
       <AuthForm mode="login" />
       <p className="mt-4 text-center text-sm text-neutral-500">
         New here?{" "}
-        <Link href="/signup" className="text-emerald-700 underline">
+        <Link href="/signup" className="text-accent underline">
           Create an account
         </Link>
       </p>

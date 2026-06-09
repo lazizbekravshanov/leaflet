@@ -25,7 +25,7 @@ export default async function ShelvesPage() {
           {shelf.items.length === 0 ? (
             <p className="text-sm text-neutral-500">
               Nothing here yet —{" "}
-              <Link href="/books" className="text-emerald-700 underline">
+              <Link href="/books" className="text-accent underline">
                 find a book
               </Link>
               .

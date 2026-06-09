@@ -7,6 +7,7 @@ import { BookCover } from "@/components/BookCover";
 import { StarDisplay } from "@/components/StarDisplay";
 import { ShelfPicker } from "@/components/ShelfPicker";
 import { ReviewForm } from "@/components/ReviewForm";
+import { ReviewCard } from "@/components/ReviewCard";
 import Link from "next/link";
 
 export default async function BookPage({
@@ -15,17 +16,16 @@ export default async function BookPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const user = await getCurrentUser();
 
   let data;
   try {
-    data = await bookService.getBookPage(id);
+    data = await bookService.getBookPage(id, user?.id ?? null);
   } catch (e) {
     if (e instanceof NotFoundError) notFound();
     throw e;
   }
   const { book, stats, reviews } = data;
-
-  const user = await getCurrentUser();
   const shelfType = user
     ? await shelfService.getShelfTypeForBook(user.id, book.id)
     : null;
@@ -54,7 +54,7 @@ export default async function BookPage({
             </div>
           ) : (
             <p className="mt-2 text-sm text-neutral-500">
-              <Link href="/login" className="text-emerald-700 underline">
+              <Link href="/login" className="text-accent underline">
                 Log in
               </Link>{" "}
               to shelve this book.
@@ -91,23 +91,11 @@ export default async function BookPage({
             <p className="text-sm text-neutral-500">No reviews yet.</p>
           )}
           {reviews.map((review) => (
-            <article
+            <ReviewCard
               key={review.id}
-              className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800"
-            >
-              <div className="mb-1 flex items-center gap-2 text-sm">
-                <span className="font-medium">@{review.user.username}</span>
-                {review.rating !== null && (
-                  <span className="text-amber-500">
-                    {"★".repeat(review.rating)}
-                  </span>
-                )}
-                <span className="text-neutral-400">
-                  {review.createdAt.toLocaleDateString()}
-                </span>
-              </div>
-              <p className="whitespace-pre-line text-sm">{review.body}</p>
-            </article>
+              review={review}
+              currentUserId={user?.id ?? null}
+            />
           ))}
         </div>
       </section>

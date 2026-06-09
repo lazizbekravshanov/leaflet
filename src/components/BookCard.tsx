@@ -7,7 +7,7 @@ export function BookCard({ book }: { book: BookSearchRow }) {
   return (
     <Link
       href={`/books/${book.id}`}
-      className="flex gap-4 rounded-lg border border-neutral-200 p-4 hover:border-emerald-700 dark:border-neutral-800"
+      className="flex gap-4 rounded-lg border border-neutral-200 p-4 hover:border-accent dark:border-neutral-800"
     >
       <BookCover coverId={book.cover_id} title={book.title} size="S" />
       <div className="min-w-0">

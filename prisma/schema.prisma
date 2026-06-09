@@ -58,6 +58,9 @@ model User {
   passwordHash String   @map("password_hash")
   displayName  String?  @map("display_name")
   bio          String?  @map("bio")
+  // Nullable by design: the UI renders an initials placeholder, so an avatar
+  // is enhancement, not requirement. No upload pipeline yet — just a URL.
+  avatarUrl    String?  @map("avatar_url")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -122,6 +125,12 @@ model Book {
   // Open Library cover id; rendered as covers.openlibrary.org/b/id/{id}-M.jpg.
   // We store the id, not the URL, so the size variant stays a render concern.
   coverId       Int?     @map("cover_id")
+  isbn          String?  @map("isbn")
+  // A Postgres text[] — fine for display/filter-by-tag at this scale. The
+  // normalized alternative (Genre + BookGenre tables) earns its keep only
+  // when genres need their own pages or metadata; revisit then. Querying:
+  // WHERE 'fantasy' = ANY(genres), indexable with a GIN index if it gets hot.
+  genres        String[] @default([]) @map("genres")
   publishedYear Int?     @map("published_year")
   pageCount     Int?     @map("page_count")
   createdAt     DateTime @default(now()) @map("created_at")

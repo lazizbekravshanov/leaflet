@@ -8,6 +8,7 @@ import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type { SeedBook } from "./fetch-books";
+import { seedDemo } from "./seed-demo";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -42,6 +43,8 @@ async function main() {
         title: entry.title,
         description: entry.description,
         coverId: entry.coverId,
+        isbn: entry.isbn,
+        genres: entry.genres,
         publishedYear: entry.publishedYear,
         pageCount: entry.pageCount,
         authors: {
@@ -52,6 +55,8 @@ async function main() {
         title: entry.title,
         description: entry.description,
         coverId: entry.coverId,
+        isbn: entry.isbn,
+        genres: entry.genres,
         publishedYear: entry.publishedYear,
         pageCount: entry.pageCount,
       },
@@ -60,6 +65,13 @@ async function main() {
 
   const count = await prisma.book.count();
   console.log(`Seeded. books in db: ${count}`);
+
+  // Demo users/reviews/follows so the feed is alive on first run.
+  const allBooks = await prisma.book.findMany({
+    select: { id: true },
+    orderBy: { title: "asc" }, // stable order keeps the demo deterministic
+  });
+  await seedDemo(prisma, allBooks.map((b) => b.id));
 }
 
 main()

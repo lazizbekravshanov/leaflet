@@ -47,8 +47,8 @@ export function ShelfPicker({
           disabled={busy}
           className={`rounded border px-3 py-1.5 text-sm disabled:opacity-50 ${
             selected === type
-              ? "border-emerald-700 bg-emerald-700 text-white"
-              : "border-neutral-300 hover:border-emerald-700 dark:border-neutral-700"
+              ? "border-accent bg-accent text-white"
+              : "border-neutral-300 hover:border-accent dark:border-neutral-700"
           }`}
         >
           {selected === type ? "✓ " : ""}

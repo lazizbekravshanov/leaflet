@@ -1,16 +1,18 @@
 [
   {
-    "openLibraryId": "OL11326416W",
-    "title": "1984 (adaptation)",
-    "description": "Winston Smith lives in a society where the government controls people every second of the day. He fights this world with love. But it's dangerous: love for another person can be punished by death - and Big Brother is always watching.\r\n\r\nOrwell's classic story shows that there is no freedom unless ideas and beliefs can be questioned. This is as true today as when it was written, more than fifty years ago.\r\n--back cover",
-    "coverId": 8745958,
-    "publishedYear": 2003,
-    "pageCount": 72,
+    "openLibraryId": "OL1168083W",
+    "title": "1984",
+    "description": "Nineteen Eighty-Four: A Novel, often referred to as 1984, is a dystopian social science fiction novel by the English novelist George Orwell (the pen name of Eric Arthur Blair). It was published on 8 June 1949 by Secker & Warburg as Orwell's ninth and final book completed in his lifetime. Thematically, Nineteen Eighty-Four centres on the consequences of totalitarianism, mass surveillance, and repressive regimentation of persons and behaviours within society. Orwell, himself a democratic socialist, modelled the authoritarian government in the novel after Stalinist Russia. More broadly, the novel examines the role of truth and facts within politics and the ways in which they are manipulated.\r\n\r\n----------\t\t\r\nAlso contained in:\t\t\r\n[Novels (Animal Farm / Burmese Days / Clergyman's Daughter / Co",
+    "coverId": 9267242,
+    "isbn": "9780451524935",
+    "genres": [
+      "classics",
+      "dystopian",
+      "sci-fi"
+    ],
+    "publishedYear": 1949,
+    "pageCount": 318,
     "authors": [
-      {
-        "openLibraryId": "OL4758538A",
-        "name": "Michael Dean"
-      },
       {
         "openLibraryId": "OL118077A",
         "name": "George Orwell"
@@ -22,6 +24,12 @@
     "title": "Animal Farm",
     "description": "Animal Farm is a brilliant political satire and a powerful and affecting story of revolutions and idealism, power and corruption. 'All animals are equal. But some animals are more equal than others.' Mr Jones of Manor Farm is so lazy and drunken that one day he forgets to feed his livestock. The ensuing rebellion under the leadership of the pigs Napoleon and Snowball leads to the animals taking over the farm. Vowing to eliminate the terrible inequities of the farmyard, the renamed Animal Farm is organised to benefit all who walk on four legs. But as time passes, the ideals of the rebellion are corrupted, then forgotten. And something new and unexpected emerges.. [Animal Farm PDF](https://chesserresources.com/doc/animal-farm-george-orwell/)",
     "coverId": 11261770,
+    "isbn": "9780812415070",
+    "genres": [
+      "classics",
+      "satire",
+      "political"
+    ],
     "publishedYear": 1945,
     "pageCount": 128,
     "authors": [
@@ -36,6 +44,12 @@
     "title": "Brave New World",
     "description": "Originally published in 1932, this outstanding work of literature is more crucial and relevant today than ever before. Cloning, feel-good drugs, antiaging programs, and total social control through politics, programming, and media -- has Aldous Huxley accurately predicted our future? With a storyteller's genius, he weaves these ethical controversies in a compelling narrative that dawns in the year 632 AF (After Ford, the deity). When Lenina and Bernard visit a savage reservation, we experience how Utopia can destroy humanity. A powerful work of speculative fiction that has enthralled and terrified readers for generations, Brave New World is both a warning to be heeded and thought-provoking yet satisfying entertainment. - Container.",
     "coverId": 8231823,
+    "isbn": "9781521308578",
+    "genres": [
+      "classics",
+      "dystopian",
+      "sci-fi"
+    ],
     "publishedYear": 1932,
     "pageCount": 241,
     "authors": [
@@ -50,6 +64,12 @@
     "title": "Fahrenheit 451",
     "description": "Fahrenheit 451 is a 1953 dystopian novel by American writer Ray Bradbury. Often regarded as one of his best works, the novel presents a future American society where books are outlawed and \"firemen\" burn any that are found. The book's tagline explains the title as \"'the temperature at which book paper catches fire, and burns\": the autoignition temperature of paper. The lead character, Guy Montag, is a fireman who becomes disillusioned with his role of censoring literature and destroying knowledge, eventually quitting his job and committing himself to the preservation of literary and cultural writings.\r\n\r\nThe novel has been the subject of interpretations focusing on the historical role of book burning in suppressing dissenting ideas for change. In a 1956 radio interview, Bradbury said that ",
     "coverId": 12993656,
+    "isbn": "9781613832493",
+    "genres": [
+      "classics",
+      "dystopian",
+      "sci-fi"
+    ],
     "publishedYear": 1953,
     "pageCount": 190,
     "authors": [
@@ -64,6 +84,12 @@
     "title": "To Kill a Mockingbird",
     "description": "One of the best-loved stories of all time, To Kill a Mockingbird has been translated into more than 40 languages, sold more than 30 million copies worldwide, served as the basis for an enormously popular motion picture, and voted one of the best novels of the 20th century by librarians across the United States. A gripping, heart-wrenching, and wholly remarkable tale of coming-of-age in a South poisoned by virulent prejudice, it views a world of great beauty and savage inequities through the eyes of a young girl, as her father -- a crusading local lawyer -- risks everything to defend a black man unjustly accused of a terrible crime.\r\n\r\nLawyer Atticus Finch defends Tom Robinson -- a black man charged with the rape of a white girl. Writing through the young eyes of Finch's children Scout and ",
     "coverId": 14351077,
+    "isbn": "9780285643864",
+    "genres": [
+      "classics",
+      "literary",
+      "historical"
+    ],
     "publishedYear": 1960,
     "pageCount": 320,
     "authors": [
@@ -78,6 +104,12 @@
     "title": "Pride and Prejudice",
     "description": "Pride and Prejudice is an 1813 novel of manners written by Jane Austen. The novel follows the character development of Elizabeth Bennet, the dynamic protagonist of the book who learns about the repercussions of hasty judgments and comes to appreciate the difference between superficial goodness and actual goodness.\r\n\r\nMr. Bennet, owner of the Longbourn estate in Hertfordshire, has five daughters, but his property is entailed and can only be passed to a male heir. His wife also lacks an inheritance, so his family faces becoming very poor upon his death. Thus, it is imperative that at least one of the girls marry well to support the others, which is a motivation that drives the plot.",
     "coverId": 14348537,
+    "isbn": "9798360092476",
+    "genres": [
+      "classics",
+      "romance",
+      "literary"
+    ],
     "publishedYear": 1813,
     "pageCount": 351,
     "authors": [
@@ -92,6 +124,12 @@
     "title": "Jane Eyre",
     "description": "The novel is set somewhere in the north of England. Jane's childhood at Gateshead Hall, where she is emotionally and physically abused by her aunt and cousins; her education at Lowood School, where she acquires friends and role models but also suffers privations and oppression; her time as the governess of Thornfield Hall, where she falls in love with her Byronic employer, Edward Rochester; her time with the Rivers family, during which her earnest but cold clergyman cousin, St John Rivers, proposes to her. Will she or will she not marry him?",
     "coverId": 8235363,
+    "isbn": "9798491663842",
+    "genres": [
+      "classics",
+      "romance",
+      "gothic"
+    ],
     "publishedYear": 1847,
     "pageCount": 480,
     "authors": [
@@ -106,6 +144,12 @@
     "title": "Wuthering Heights",
     "description": "Wuthering Heights is an 1847 novel by Emily Brontë, initially published under the pseudonym Ellis Bell. It concerns two families of the landed gentry living on the West Yorkshire moors, the Earnshaws and the Lintons, and their turbulent relationships with Earnshaw's adopted son, Heathcliff. The novel was influenced by Romanticism and Gothic fiction.",
     "coverId": 12818862,
+    "isbn": "9798484243747",
+    "genres": [
+      "classics",
+      "romance",
+      "gothic"
+    ],
     "publishedYear": 1846,
     "pageCount": 318,
     "authors": [
@@ -120,6 +164,11 @@
     "title": "The Great Gatsby",
     "description": "Here is a novel, glamorous, ironical, compassionate – a marvelous fusion into unity of the curious incongruities of the life of the period – which reveals a hero like no other – one who could live at no other time and in no other place. But he will live as a character, we surmise, as long as the memory of any reader lasts.\r\n\r\n\"There was something gorgeous about him, some heightened sensitivity to the promises of life.... It was an extraordinary gift for hope, a romantic readiness such as I have never found in any other person and which it is not likely I shall ever find again.\"\r\n\r\nIt is the story of this Jay Gatsby who came so mysteriously to West Egg, of his sumptuous entertainments, and of his love for Daisy Buchanan – a story that ranges from pure lyrical beauty to sheer brutal realism,",
     "coverId": 10590366,
+    "isbn": "9786053325956",
+    "genres": [
+      "classics",
+      "literary"
+    ],
     "publishedYear": 1920,
     "pageCount": 185,
     "authors": [
@@ -134,6 +183,12 @@
     "title": "Moby Dick",
     "description": "\"Command the murderous chalices! Drink ye harpooners! Drink and swear, ye men that man the deathful whaleboat's bow -- Death to Moby Dick!\" So Captain Ahab binds his crew to fulfil his obsession -- the destruction of the great white whale. Under his lordly but maniacal command the Pequod's commercial mission is perverted to one of vengeance. To Ahab, the monster that destroyed his body is not a creature, but the symbol of \"some unknown but still reasoning thing.\" Uncowed by natural disasters, ill omens, even death, Ahab urges his ship towards \"the undeliverable, nameless perils of the whale.\"",
     "coverId": 10544254,
+    "isbn": "9780791091067",
+    "genres": [
+      "classics",
+      "adventure",
+      "literary"
+    ],
     "publishedYear": 1851,
     "pageCount": 452,
     "authors": [
@@ -144,16 +199,22 @@
     ]
   },
   {
-    "openLibraryId": "OL267171W",
+    "openLibraryId": "OL40255790W",
     "title": "War and Peace",
-    "description": "War and Peace delineates in graphic detail events surrounding the French invasion of Russia, and the impact of the Napoleonic era on Tsarist society, as seen through the eyes of five Russian aristocratic families.\r\nThe novel begins in the year 1805 during the reign of Tsar Alexander I and leads up to the 1812 French invasion of Russia by Napoleon. The era of Catherine the Great (1762–1796), when the royal court in Paris was the centre of western European civilization,[16] is still fresh in the minds of older people. Catherine, fluent in French and wishing to reshape Russia into a great European nation, made French the language of her royal court. For the next one hundred years, it became a social requirement for members of the Russian nobility to speak French and understand French culture.",
-    "coverId": 12621906,
-    "publishedYear": 1864,
-    "pageCount": 696,
+    "description": null,
+    "coverId": null,
+    "isbn": "9781717326386",
+    "genres": [
+      "classics",
+      "historical",
+      "literary"
+    ],
+    "publishedYear": 1928,
+    "pageCount": 622,
     "authors": [
       {
         "openLibraryId": "OL26783A",
-        "name": "Лев Толстой"
+        "name": "Tolstoy, Leo, graf, 1828-1910"
       }
     ]
   },
@@ -162,6 +223,12 @@
     "title": "Anna Karenina",
     "description": null,
     "coverId": null,
+    "isbn": "9783734502583",
+    "genres": [
+      "classics",
+      "romance",
+      "literary"
+    ],
     "publishedYear": 2016,
     "pageCount": null,
     "authors": [
@@ -184,6 +251,12 @@
     "title": "Crime and Punishment",
     "description": null,
     "coverId": 13116014,
+    "isbn": "9798352867082",
+    "genres": [
+      "classics",
+      "literary",
+      "psychological"
+    ],
     "publishedYear": 1941,
     "pageCount": 551,
     "authors": [
@@ -198,20 +271,22 @@
     ]
   },
   {
-    "openLibraryId": "OL24600223W",
+    "openLibraryId": "OL31477300W",
     "title": "The Brothers Karamazov",
     "description": null,
-    "coverId": 11263774,
-    "publishedYear": 2015,
-    "pageCount": 867,
+    "coverId": 13909201,
+    "isbn": "9780451509154",
+    "genres": [
+      "classics",
+      "literary",
+      "philosophy"
+    ],
+    "publishedYear": 1948,
+    "pageCount": null,
     "authors": [
       {
         "openLibraryId": "OL22242A",
-        "name": "Фёдор Михайлович Достоевский"
-      },
-      {
-        "openLibraryId": "OL9271534A",
-        "name": "Constance Garrett"
+        "name": "Fyodor Dostoevsky"
       }
     ]
   },
@@ -220,6 +295,12 @@
     "title": "One Hundred Years of Solitude",
     "description": "One of the twentieth century’s enduring works, *One Hundred Years of Solitude* is a widely beloved and acclaimed novel known throughout the world and the ultimate achievement in a Nobel Prize–winning career. \r\n\r\nThe novel tells the story of the Buendia family, set against the background of the evolution and eventual decadence of a small South American town, the mythical town of Macondo.",
     "coverId": null,
+    "isbn": "9780141032436",
+    "genres": [
+      "literary",
+      "magical-realism",
+      "classics"
+    ],
     "publishedYear": 2007,
     "pageCount": null,
     "authors": [
@@ -234,12 +315,18 @@
     ]
   },
   {
-    "openLibraryId": "OL24998368W",
+    "openLibraryId": "OL43267324W",
     "title": "Love in the Time of Cholera",
     "description": null,
     "coverId": null,
-    "publishedYear": null,
-    "pageCount": null,
+    "isbn": null,
+    "genres": [
+      "literary",
+      "romance",
+      "magical-realism"
+    ],
+    "publishedYear": 1989,
+    "pageCount": 370,
     "authors": [
       {
         "openLibraryId": "OL27363A",
@@ -252,6 +339,12 @@
     "title": "Beloved",
     "description": "Toni Morrison--author of Song of Solomon and Tar Baby--is a writer of remarkable powers: her novels, brilliantly acclaimed for their passion, their dazzling language and their lyric and emotional force, combine the unassailable truths of experience and emotion with the vision of legend and imagination. It is the story--set in post-Civil War Ohio--of Sethe, an escaped slave who has risked death in order to wrench herself from a living death; who has lost a husband and buried a child; who has borne the unthinkable and not gone mad: a woman of \"iron eyes and backbone to match.\" Sethe lives in a small house on the edge of town with her daughter, Denver, her mother-in-law, Baby Suggs, and a disturbing, mesmerizing intruder who calls herself Beloved. Sethe works at \"beating back the past,\" but i",
     "coverId": 8261367,
+    "isbn": "9785699874958",
+    "genres": [
+      "literary",
+      "historical",
+      "classics"
+    ],
     "publishedYear": 1987,
     "pageCount": 330,
     "authors": [
@@ -266,6 +359,12 @@
     "title": "The Color Purple",
     "description": "The Color Purple is a 1982 epistolary novel by American author Alice Walker which won the 1983 Pulitzer Prize for Fiction and the National Book Award for Fiction.\r\n\r\nThe novel has been the frequent target of censors and appears on the American Library Association list of the 100 Most Frequently Challenged Books of 2000–2009 at number seventeenth because of the sometimes explicit content, particularly in terms of violence. In 2003, the book was listed on the BBC's The Big Read poll of the UK's \"best-loved novels.\"\r\n\r\n----------\r\nAlso contained in:\r\n\r\n - [The Third Life of Grange Copeland / Meridian / The Color Purple][1]\r\n\r\n\r\n  [1]: https://openlibrary.org/works/OL18025207W/The_Third_Life_of_Grange_Copeland_Meridian_The_Color_Purple",
     "coverId": 8564628,
+    "isbn": "9788401321474",
+    "genres": [
+      "literary",
+      "historical",
+      "classics"
+    ],
     "publishedYear": 1976,
     "pageCount": 262,
     "authors": [
@@ -280,6 +379,12 @@
     "title": "Catch-22",
     "description": "*Catch-22* is like no other novel. It has its own rationale, its own extraordinary character. It moves back and forth from hilarity to horror. It is outrageously funny and strangely affecting. It is totally original. Set in the closing months of World War II in an American bomber squadron off Italy, *Catch-22* is the story of a bombardier named Yossarian, who is frantic and furious because thousands of people he hasn't even met keep trying to kill him. *Catch-22* is a microcosm of the twentieth-century world as it might look to someone dangerously sane. It is a novel that lives and moves and grows with astonishing power and vitality -- a masterpiece of our time. - Back cover.",
     "coverId": 6468653,
+    "isbn": "9780224613286",
+    "genres": [
+      "classics",
+      "satire",
+      "war"
+    ],
     "publishedYear": 1961,
     "pageCount": 463,
     "authors": [
@@ -294,6 +399,12 @@
     "title": "Slaughterhouse-Five",
     "description": "Slaughterhouse-Five is one of the world's great anti-war books. Centering on the infamous fire-bombing of Dresden, Billy Pilgrim's odyssey through time reflects the mythic journey of our own fractured lives as we search for meaning in what we are afraid to know.",
     "coverId": 12727001,
+    "isbn": "9781559949255",
+    "genres": [
+      "classics",
+      "sci-fi",
+      "satire"
+    ],
     "publishedYear": 1968,
     "pageCount": 203,
     "authors": [
@@ -308,6 +419,12 @@
     "title": "The Catcher in the Rye",
     "description": "Story of Holden Caufield with his idiosyncrasies, penetrating insight, confusion, sensitivity and negativism. Holden, knowing he is to be expelled from school, decides to leave early. He spends three days in New York City and tells the story of what he did and suffered there.",
     "coverId": 9273490,
+    "isbn": "9781517712112",
+    "genres": [
+      "classics",
+      "literary",
+      "coming-of-age"
+    ],
     "publishedYear": 1945,
     "pageCount": 240,
     "authors": [
@@ -326,6 +443,11 @@
     "title": "Of Mice and Men",
     "description": "The second book in John Steinbeck’s labor trilogy, Of Mice and Men is a touching tale of two migrant laborers in search of work and eventual liberation from their social circumstances. Fiercely devoted to one another, George and Lennie plan to save up to finance their dream of someday owning a small piece of land. The pair seems unstoppable until tragedy strikes and their hopes come crashing down, forcing George to make a difficult decision regarding the welfare of his best friend.\r\n\r\nThe novel is set on a ranch in Soledad, CA. Author Frank Bergon recalls reading Of Mice and Men for the first time as a teenager living in the San Joaquin Valley and remembers how he saw “as if in a jolt of light the ordinary surroundings of [his] life become worthy of literature.” Steinbeck works to propagat",
     "coverId": 14319003,
+    "isbn": "9781542647649",
+    "genres": [
+      "classics",
+      "literary"
+    ],
     "publishedYear": 1937,
     "pageCount": 119,
     "authors": [
@@ -340,6 +462,12 @@
     "title": "The Grapes of Wrath",
     "description": "Steinbeck’s classic novel of the Great Depression is as vivid now as ever. The story focuses on a family of Oklahoma sharecroppers, farmers who work another man’s land for a share of the crops. Driven from their home by drought and poverty they take to the road in a battered old truck and make their way to California to look for work. When they arrive they find hundreds of others like them being forced to work for breadline wages. they begin working as fruit pickers, strike-breakers replacing the people who have been trying to establish a union but their consciences force them to leave.",
     "coverId": 12715902,
+    "isbn": "9780749303273",
+    "genres": [
+      "classics",
+      "literary",
+      "historical"
+    ],
     "publishedYear": 1939,
     "pageCount": 544,
     "authors": [
@@ -354,6 +482,12 @@
     "title": "East of Eden",
     "description": "Steinbeck considered East of Eden to be his masterpiece. In his journal, Journal of a Novel (often read as a companion to the novel) he notes that “this is the book I have always wanted and have worked and prayed to be able to write Set primarily in the Salinas Valley in the early twentieth century, the novel traces three generations of two families – the Trasks and the Hamiltons – as they grapple with the ever-present forces of good and evil. From this plot emerged some of Steinbeck’s most fascinating characters – many of whom are modeled after people in his own life.\r\n\r\nPart allegory, part autobiography, and part epic, East of Eden was an ambitious project from the start – a gift to Steinbeck’s sons that was meant to teach them about identity, grief, and what it means to be human. Tinged",
     "coverId": 11386937,
+    "isbn": "9780241980354",
+    "genres": [
+      "classics",
+      "literary",
+      "family-saga"
+    ],
     "publishedYear": 1952,
     "pageCount": 613,
     "authors": [
@@ -368,6 +502,12 @@
     "title": "Lord of the Flies",
     "description": "Lord of the Flies is a 1954 novel by Nobel Prize–winning British author William Golding. The book focuses on a group of British boys stranded on an uninhabited island and their disastrous attempt to govern themselves. Themes include the tension between groupthink and individuality, between rational and emotional reactions, and between morality and immorality.\r\n\r\nThe novel has been generally well received. It was named in the Modern Library 100 Best Novels, reaching number 41 on the editor's list, and 25 on the reader's list. In 2003 it was listed at number 70 on the BBC's The Big Read poll, and in 2005 Time magazine named it as one of the 100 best English-language novels from 1923 to 2005. Time also included the novel in its list of the 100 Best Young-Adult Books of All Time. Popular readi",
     "coverId": 8684447,
+    "isbn": "9788307025018",
+    "genres": [
+      "classics",
+      "literary",
+      "dystopian"
+    ],
     "publishedYear": 1954,
     "pageCount": 243,
     "authors": [
@@ -382,6 +522,12 @@
     "title": "The Hobbit",
     "description": "The Hobbit is a tale of high adventure, undertaken by a company of dwarves in search of dragon-guarded gold. A reluctant partner in this perilous quest is Bilbo Baggins, a comfort-loving unambitious hobbit, who surprises even himself by his resourcefulness and skill as a burglar.\r\n\r\nEncounters with trolls, goblins, dwarves, elves, and giant spiders, conversations with the dragon, Smaug, and a rather unwilling presence at the Battle of Five Armies are just some of the adventures that befall Bilbo.\r\n\r\nBilbo Baggins has taken his place among the ranks of the immortals of children’s fiction. Written by Professor Tolkien for his children, The Hobbit met with instant critical acclaim when published.",
     "coverId": 14627509,
+    "isbn": "9780007525492",
+    "genres": [
+      "fantasy",
+      "classics",
+      "adventure"
+    ],
     "publishedYear": 1937,
     "pageCount": 310,
     "authors": [
@@ -396,6 +542,12 @@
     "title": "The Fellowship of the Ring",
     "description": "One Ring to rule them all, One Ring to find them, One Ring to bring them all and in the darkness bind them.\r\n\r\n“A unique, wholly realized other world, evoked from deep in the well of Time, massively detailed, absorbingly entertaining, profound in meaning.”—The New York Times\r\n\r\nIn ancient times the Rings of Power were crafted by the Elven-smiths, and Sauron, the Dark Lord, forged the One Ring, filling it with his own power so that he could rule all others. But the One Ring was taken from him, and though he sought it throughout Middle-earth, it remained lost to him. After many ages it fell into the hands of Bilbo Baggins, as told in The Hobbit. In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his",
     "coverId": 14627060,
+    "isbn": "9780547952017",
+    "genres": [
+      "fantasy",
+      "classics",
+      "adventure"
+    ],
     "publishedYear": 1954,
     "pageCount": 494,
     "authors": [
@@ -410,6 +562,11 @@
     "title": "Harry Potter and the Philosopher's Stone",
     "description": "Turning the envelope over, his hand trembling, Harry saw a purple wax seal bearing a coat of arms; a lion, an eagle, a badger and a snake surrounding a large letter 'H'.\r\n\r\nHARRY POTTER has never even heard of Hogwarts when the LETTERS start dropping on the doormat at number four, Privet Drive. Addressed in GREEN INK on yellowish parchment with a PURPLE SEAL, they are swiftly confiscated by his GRISLY aunt and uncle. Then, on Harry's eleventh birthday, a great beetle-eyed giant of a man called RUBEUS HAGRID bursts in with some ASTONISHING news: Harry Potter is a wizard, and he has a place at Hogwarts School of Witchcraft and Wizardry. An incredible adventure is about to begin! [**PDF**](https://chesserresources.com/doc/harry-potter-and-the-philosophers-stone-pdf/)",
     "coverId": 15155833,
+    "isbn": "9782070619177",
+    "genres": [
+      "fantasy",
+      "young-adult"
+    ],
     "publishedYear": 1997,
     "pageCount": 302,
     "authors": [
@@ -424,6 +581,11 @@
     "title": "A Game of Thrones",
     "description": "***A Game of Thrones*** is the inaugural novel in ***A Song of Ice and Fire***, an epic series of fantasy novels crafted by the American author **George R. R. Martin**. Published on August 1, 1996, this novel introduces readers to the richly detailed world of Westeros and Essos, where political intrigue, power struggles, and magical elements intertwine.\r\n\r\nThe story unfolds through multiple perspectives, each chapter focusing on a different character, allowing readers to experience the narrative from various angles. This complex structure has become a hallmark of Martin's storytelling, immersing readers in the lives and motivations of a diverse cast.\r\n\r\n### Plot Summary\r\n\r\nSet in the fictional continents of Westeros and Essos, the narrative revolves around the power struggles among noble f",
     "coverId": 9269962,
+    "isbn": "9789506442279",
+    "genres": [
+      "fantasy",
+      "epic"
+    ],
     "publishedYear": 1996,
     "pageCount": 801,
     "authors": [
@@ -438,6 +600,11 @@
     "title": "The Name of the Wind",
     "description": "***The Name of the Wind***, also called ***The Kingkiller Chronicle: Day One***, is a heroic fantasy novel written by American author Patrick Rothfuss. It is the first book in the ongoing fantasy trilogy ***The Kingkiller Chronicle***. It was published on March 27, 2007, by DAW Books, the novel has been hailed as a masterpiece of high fantasy.\r\n\r\nThe story begins the tale of Kvothe (pronounced \"quothe\"), a young man who becomes the most notorious magician his world has ever known. Kvothe narrates his own journey, from his childhood in a troupe of traveling players to his years as a near-feral orphan in a crime-ridden city, and his daring entrance into a prestigious and perilous school of magic.\r\n\r\nPatrick Rothfuss's debut novel has been praised for its fresh and earthy originality, transpo",
     "coverId": 11480483,
+    "isbn": "9781956000689",
+    "genres": [
+      "fantasy",
+      "epic"
+    ],
     "publishedYear": 2007,
     "pageCount": 736,
     "authors": [
@@ -456,6 +623,12 @@
     "title": "Dune",
     "description": "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the \"spice\" melange, a drug capable of extending life and enhancing consciousness. Coveted across the known universe, melange is a prize worth killing for...\r\n\r\nWhen House Atreides is betrayed, the destruction of Paul's family will set the boy on a journey toward a destiny greater than he could ever have imagined. And as he evolves into the mysterious man known as Muad'Dib, he will bring to fruition humankind's most ancient and unattainable dream.\r\n\r\nA stunning blend of adventure and mysticism, environmentalism and politics, Dune won the first Nebula Award, shared the Hugo Award, and formed the basis of what is undoub",
     "coverId": 11481354,
+    "isbn": "9785237030778",
+    "genres": [
+      "sci-fi",
+      "classics",
+      "epic"
+    ],
     "publishedYear": 1965,
     "pageCount": 592,
     "authors": [
@@ -466,12 +639,17 @@
     ]
   },
   {
-    "openLibraryId": "OL46309W",
-    "title": "Second Foundation",
-    "description": "After years of struggle, the Foundation lay in ruins -- destroyed by the mutant mind power of the Mule. But it was rumored that there was a Second Foundation hidden somewhere at the end of the Galaxy, established to preserve the knowledge of mankind through the long centuries of barbarism. The Mule had failed to find it the first time -- but now he was certain he knew where it lay.\r\n\r\nThe fate of the Foundation rests on young Arkady Darell, only fourteen years old and burdened with a terrible secret. As its scientists girded for a final showdown with the Mule, the survivors of the First Foundation began their desperate search. They too wanted the Second Foundation destroyed... before it destroyed them.",
-    "coverId": 9261324,
-    "publishedYear": 1953,
-    "pageCount": 237,
+    "openLibraryId": "OL46125W",
+    "title": "Foundation",
+    "description": "One of the great masterworks of science fiction, the Foundation novels of Isaac Asimov are unsurpassed for their unique blend of nonstop action, daring ideas, and extensive world-building. \r\n\r\nThe story of our future begins with the history of Foundation and its greatest psychohistorian: Hari Seldon.  For twelve thousand years the Galactic Empire has ruled supreme. Now it is dying.  Only Hari Seldon, creator of the revolutionary science of psychohistory, can see into the future--a dark age of ignorance, barbarism, and warfare that will last thirty thousand years. To preserve knowledge and save mankind, Seldon gathers the best minds in the Empire--both scientists and scholars--and brings them to a bleak planet at the edge of the Galaxy to serve as a beacon of hope for future generations. He",
+    "coverId": 14612610,
+    "isbn": "9782724222494",
+    "genres": [
+      "sci-fi",
+      "classics"
+    ],
+    "publishedYear": 1951,
+    "pageCount": 240,
     "authors": [
       {
         "openLibraryId": "OL34221A",
@@ -484,6 +662,11 @@
     "title": "Neuromancer",
     "description": "The first of William Gibson's Sprawl trilogy, *Neuromancer* is the classic cyberpunk novel. The winner of the Hugo, Nebula, and Philip K. Dick Awards, *Neuromancer* was the first fully-realized glimpse of humankind’s digital future — a shocking vision that has challenged our assumptions about our technology and ourselves, reinvented the way we speak and think, and forever altered the landscape of our imaginations.\r\n\r\nHenry Dorsett Case was the sharpest data-thief in the business, until vengeful former employees crippled his nervous system. But now a new and very mysterious employer recruits him for a last-chance run. The target: an unthinkably powerful artificial intelligence orbiting Earth in service of the sinister Tessier-Ashpool business clan. With a dead man riding shotgun and Molly, ",
     "coverId": 283860,
+    "isbn": "9788445009444",
+    "genres": [
+      "sci-fi",
+      "cyberpunk"
+    ],
     "publishedYear": 1984,
     "pageCount": 317,
     "authors": [
@@ -498,6 +681,11 @@
     "title": "Snow Crash",
     "description": "Within the Metaverse, Hiro is offered a datafile named Snow Crash by a man named Raven who hints that it is a form of narcotic. Hiro's friend and fellow hacker Da5id views a bitmap image contained in the file which causes his computer to crash and Da5id to suffer brain damage in the real world.\r\n\r\nThis is the future we now live where all can be brought to life in the metaverse and now all can be taken away. Follow on an adventure with Hiro and YT as they work with the mob to uncover a plot of biblical proportions.",
     "coverId": 392508,
+    "isbn": "9780593599730",
+    "genres": [
+      "sci-fi",
+      "cyberpunk"
+    ],
     "publishedYear": 1992,
     "pageCount": 460,
     "authors": [
@@ -512,6 +700,11 @@
     "title": "The Left Hand of Darkness",
     "description": "[Comment by Kim Stanley Robinson, on The Guardian's website][1]:\r\nThe Left Hand of Darkness by Ursula K Le Guin (1969)\r\n\r\n> One of my favorite novels is The Left Hand of Darkness, by Ursula K Le Guin. For more than 40 years I've been recommending this book to people who want to try science fiction for the first time, and it still serves very well for that. One of the things I like about it is how clearly it demonstrates that science fiction can have not only the usual virtues and pleasures of the novel, but also the startling and transformative power of the thought experiment.\r\n\r\n> In this case, the thought experiment is quickly revealed: \"The king was pregnant,\" the book tells us early on, and after that we learn more and more about this planet named Winter, stuck in an ice age, where the",
     "coverId": 10618463,
+    "isbn": "9785050040107",
+    "genres": [
+      "sci-fi",
+      "literary"
+    ],
     "publishedYear": 1969,
     "pageCount": 304,
     "authors": [
@@ -522,12 +715,17 @@
     ]
   },
   {
-    "openLibraryId": "OL25125779W",
-    "title": "The Ultimate Hitchhiker's Guide to the Galaxy",
-    "description": null,
-    "coverId": 11972784,
-    "publishedYear": 2012,
-    "pageCount": 808,
+    "openLibraryId": "OL2163649W",
+    "title": "The Hitchhiker's Guide to the Galaxy",
+    "description": "The Hitchhiker's Guide to the Galaxy is the first of six books in the Hitchhiker's Guide to the Galaxy comedy science fiction \"hexalogy\" by Douglas Adams. The novel is an adaptation of the first four parts of Adams's radio series of the same name. The novel was first published in London on 12 October 1979. It sold 250,000 copies in the first three months.\r\n\r\nThe namesake of the novel is The Hitchhiker's Guide to the Galaxy, a fictional guide book for hitchhikers (inspired by the Hitch-hiker's Guide to Europe) written in the form of an encyclopaedia.\r\n\r\n\r\n----------\r\nAlso contained in:\r\n\r\n - [The Hitch Hiker's Guide to the Galaxy: A Trilogy in Four Parts][1]\r\n - [The More than Complete Hitchhiker's Guide][2]\r\n - [Ultimate Hitchhiker's Guide to the Galaxy](https://openlibrary.org/works/OL216",
+    "coverId": 12986869,
+    "isbn": "9781417642595",
+    "genres": [
+      "sci-fi",
+      "comedy"
+    ],
+    "publishedYear": 1979,
+    "pageCount": 216,
     "authors": [
       {
         "openLibraryId": "OL272947A",
@@ -540,6 +738,11 @@
     "title": "Ender's Game",
     "description": "Ender's Game is a 1985 military science fiction novel by American author Orson Scott Card. Set at an unspecified date in Earth's future, the novel presents an imperiled humankind after two conflicts with the Formics, an insectoid alien species they dub the \"buggers\". In preparation for an anticipated third invasion, children, including the novel's protagonist, Andrew \"Ender\" Wiggin, are trained from a very young age by putting them through increasingly difficult games, including some in zero gravity, where Ender's tactical genius is revealed.\r\n\r\nThe book originated as a short story of the same name, published in the August 1977 issue of Analog Science Fiction and Fact. The novel was published on January 15, 1985. Later, by elaborating on characters and plotlines depicted in the novel, Card",
     "coverId": 12996033,
+    "isbn": "9780765362339",
+    "genres": [
+      "sci-fi",
+      "young-adult"
+    ],
     "publishedYear": 1985,
     "pageCount": 330,
     "authors": [
@@ -554,6 +757,11 @@
     "title": "The Martian",
     "description": "The Martian is a 2011 science fiction novel written by Andy Weir. It was his debut novel under his own name. It was originally self-published in 2011; Crown Publishing purchased the rights and re-released it in 2014. The story follows an American astronaut, Mark Watney, as he becomes stranded alone on Mars in 2035 and must improvise in order to survive.",
     "coverId": 11447888,
+    "isbn": "9789045207957",
+    "genres": [
+      "sci-fi",
+      "thriller"
+    ],
     "publishedYear": 2011,
     "pageCount": 407,
     "authors": [
@@ -568,6 +776,11 @@
     "title": "Project Hail Mary",
     "description": "Ryland Grace is the sole survivor on a desperate, last-chance mission–and if he fails, humanity and the earth itself will perish. Except that right now, he doesn’t know that. He can’t even remember his own name, let alone the nature of his assignment or how to complete it. All he knows is that he’s been asleep for a very, very long time. And he’s just been awakened to find himself millions of miles from home, with nothing but two corpses for company.\r\n\r\nHis crewmates dead, his memories fuzzily returning, he realizes that an impossible task now confronts him. Alone on this tiny ship that’s been cobbled together by every government and space agency on the planet and hurled into the depths of space, it’s up to him to conquer an extinction-level threat to our species.\r\n\r\nAnd thanks to an unexp",
     "coverId": 11200092,
+    "isbn": "9780593355275",
+    "genres": [
+      "sci-fi",
+      "thriller"
+    ],
     "publishedYear": 2021,
     "pageCount": 496,
     "authors": [
@@ -579,15 +792,20 @@
   },
   {
     "openLibraryId": "OL2625431W",
-    "title": "海辺のカフカ",
+    "title": "Kafka on the Shore",
     "description": "A boy trying to escape a gruesome oedipedal prophecy, a simple man who can talk to cats, a mysterious librarian, and a woman waiting for a long-dead lover.",
     "coverId": 4982600,
+    "isbn": "9789871544189",
+    "genres": [
+      "literary",
+      "magical-realism"
+    ],
     "publishedYear": 2001,
     "pageCount": 576,
     "authors": [
       {
         "openLibraryId": "OL382524A",
-        "name": "村上春樹"
+        "name": "Haruki Murakami"
       }
     ]
   },
@@ -596,26 +814,36 @@
     "title": "Norwegian Wood",
     "description": "As his plane lands at a European airport, thirty-seven-year-old Toru Watanabe casually hears an old Beatles song. Suddenly, the music transports him back to his youth, to the turbulent Tokyo of the late sixties. He then remembers, with melancholy and unease, the unstable and mysterious Naoko, the girlfriend of his best—and only—friend from adolescence, Kizuki, and how Kizuki's suicide distanced them for a year until they reunited at university. There, they began an intimate relationship, which was soon cut short by Naoko’s fragile mental health, leading to her admission to a rest center. Shortly afterward, Watanabe fell in love with Midori, a lively and determined young woman. Indecisive and plagued by fears, Watanabe experienced only bewilderment and disillusionment in the very areas wher",
     "coverId": 2237620,
+    "isbn": "9780307744661",
+    "genres": [
+      "literary",
+      "romance"
+    ],
     "publishedYear": 1987,
     "pageCount": 389,
     "authors": [
       {
         "openLibraryId": "OL382524A",
-        "name": "村上春樹"
+        "name": "Haruki Murakami"
       }
     ]
   },
   {
-    "openLibraryId": "OL8584931W",
-    "title": "Haruki Murakami's The Wind-up Bird Chronicle",
-    "description": null,
-    "coverId": 630454,
-    "publishedYear": 2002,
-    "pageCount": 99,
+    "openLibraryId": "OL2625412W",
+    "title": "The Wind-Up Bird Chronicle",
+    "description": "Japan’s most highly regarded novelist now vaults into the first ranks of international fiction writers with this heroically imaginative novel, which is at once a detective story, an account of a disintegrating marriage, and an excavation of the buried secrets of World War II.\r\n([source][1])\r\n\r\n\r\n  [1]: http://www.harukimurakami.com/book/the-wind-up-bird-chronicle",
+    "coverId": 12627437,
+    "isbn": "9783442726684",
+    "genres": [
+      "literary",
+      "magical-realism"
+    ],
+    "publishedYear": 1997,
+    "pageCount": 632,
     "authors": [
       {
-        "openLibraryId": "OL2882650A",
-        "name": "Matthew Strecher"
+        "openLibraryId": "OL382524A",
+        "name": "Haruki Murakami"
       }
     ]
   },
@@ -624,6 +852,12 @@
     "title": "The Road",
     "description": "Cormac McCarthy's tenth novel, The Road, is his most harrowing yet deeply personal work. Some unnamed catastrophe has scourged the world to a burnt-out cinder, inhabited by the last remnants of mankind and a very few surviving dogs and fungi. The sky is perpetually shrouded by dust and toxic particulates; the seasons are merely varied intensities of cold and dampness. Bands of cannibals roam the roads and inhabit what few dwellings remain intact in the woods.\r\n\r\nThrough this nightmarish residue of America a haggard father and his young son attempt to flee the oncoming Appalachian winter and head towards the southern coast along carefully chosen back roads. Mummified corpses are their only benign companions, sitting in doorways and automobiles, variously impaled or displayed on pikes and ta",
     "coverId": 198120,
+    "isbn": "9781283995344",
+    "genres": [
+      "literary",
+      "dystopian",
+      "post-apocalyptic"
+    ],
     "publishedYear": 2006,
     "pageCount": 287,
     "authors": [
@@ -635,9 +869,15 @@
   },
   {
     "openLibraryId": "OL40875W",
-    "title": "No country for old men",
+    "title": "No Country for Old Men",
     "description": "In his blistering new novel, Cormac McCarthy returns to the Texas-Mexico border, setting of his famed Border Trilogy. The time is our own, when rustlers have given way to drug-runners and small towns have become free-fire zones. One day, a good old boy named Llewellyn Moss finds a pickup truck surrounded by a bodyguard of dead men. A load of heroin and two million dollars in cash are still in the back. When Moss takes the money, he sets off a chain reaction of catastrophic violence that not even the law--in the person of aging, disillusioned Sheriff Bell--can contain.As Moss tries to evade his pursuers--in particular a mysterious mastermind who flips coins for human lives--McCarthy simultaneously strips down the American crime novel and broadens its concerns to encompass themes as ancient ",
     "coverId": 9296899,
+    "isbn": "9780375406775",
+    "genres": [
+      "literary",
+      "thriller",
+      "western"
+    ],
     "publishedYear": 1900,
     "pageCount": 309,
     "authors": [
@@ -652,6 +892,11 @@
     "title": "Gone Girl",
     "description": "Gone Girl is a 2012 crime thriller novel by American writer Gillian Flynn. It was published by Crown Publishing Group in June 2012. The novel became popular and made the New York Times Best Seller list. The sense of suspense in the novel comes from whether or not Nick Dunne is involved in the disappearance of his wife Amy.\r\n\r\n\r\n----------\r\nAlso contained in:\r\n[Les apparences suvi de la novella Nous allons mourir ce soir](https://openlibrary.org/works/OL24801746W)",
     "coverId": 8368314,
+    "isbn": "9780297859390",
+    "genres": [
+      "thriller",
+      "mystery"
+    ],
     "publishedYear": 2011,
     "pageCount": 475,
     "authors": [
@@ -663,9 +908,15 @@
   },
   {
     "openLibraryId": "OL31964906W",
-    "title": "Man SOM Hatar Kvinnor [The Girl with the Dragon Tattoo] (Korean Edition)",
+    "title": "The Girl with the Dragon Tattoo",
     "description": null,
     "coverId": null,
+    "isbn": "9788901116150",
+    "genres": [
+      "thriller",
+      "mystery",
+      "crime"
+    ],
     "publishedYear": 2011,
     "pageCount": null,
     "authors": [
@@ -680,6 +931,11 @@
     "title": "The Remains of the Day",
     "description": "In the summer of 1956, Stevens, the ageing butler of Darlington Hall, embarks on a leisurely holiday that will take him deep into the countryside and into his past . . .A contemporary classic, The Remains of the Day is Kazuo Ishiguro's beautiful and haunting evocation of life between the wars in a Great English House, of lost causes and lost love.",
     "coverId": 95742,
+    "isbn": "9788806134815",
+    "genres": [
+      "literary",
+      "historical"
+    ],
     "publishedYear": 1989,
     "pageCount": 256,
     "authors": [
@@ -694,6 +950,12 @@
     "title": "Never Let Me Go",
     "description": "Ishiguro explores what it means to have a soul and how art distinguishes man from other life forms. But above all, *Never Let Me Go* is a study of friendship and the bonds we form which make or break while we come of age.",
     "coverId": 1047334,
+    "isbn": "9780593536551",
+    "genres": [
+      "literary",
+      "sci-fi",
+      "dystopian"
+    ],
     "publishedYear": 2005,
     "pageCount": 288,
     "authors": [
@@ -708,6 +970,12 @@
     "title": "Sapiens",
     "description": "From a renowned historian comes a groundbreaking narrative of humanity’s creation and evolution—a #1 international bestseller—that explores the ways in which biology and history have defined us and enhanced our understanding of what it means to be “human.”\r\n\r\nOne hundred thousand years ago, at least six different species of humans inhabited Earth. Yet today there is only one—homo sapiens. What happened to the others? And what may happen to us?\r\n\r\nMost books about the history of humanity pursue either a historical or a biological approach, but Dr. Yuval Noah Harari breaks the mold with this highly original book that begins about 70,000 years ago with the appearance of modern cognition. From examining the role evolving humans have played in the global ecosystem to charting the rise of empire",
     "coverId": 8634250,
+    "isbn": "9782226479822",
+    "genres": [
+      "nonfiction",
+      "history",
+      "science"
+    ],
     "publishedYear": 2011,
     "pageCount": 456,
     "authors": [
@@ -722,6 +990,11 @@
     "title": "Educated",
     "description": "*Educated* is a 2018 memoir by the American author Tara Westover. Westover recounts overcoming her survivalist Mormon family in order to go to college, and emphasizes the importance of education in enlarging her world. She details her journey from her isolated life in the mountains of Idaho to completing a PhD program in history at Cambridge University. She started college at the age of 17 having had no formal education. She explores her struggle to reconcile her desire to learn with the world she inhabited with her father.",
     "coverId": 8314077,
+    "isbn": "9786160834556",
+    "genres": [
+      "nonfiction",
+      "memoir"
+    ],
     "publishedYear": 2018,
     "pageCount": 388,
     "authors": [

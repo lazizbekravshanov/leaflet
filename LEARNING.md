@@ -109,7 +109,63 @@ standalone Express service tomorrow, which files move, which get rewritten,
 and which are untouched? (If the answer isn't "routes get rewritten, services
 and repositories move, UI is untouched", the layering leaked.)
 
-## 7. Seeding & external data (prisma/fetch-books.ts, prisma/seed.ts)
+## 7. The feed (src/repositories/feed.repository.ts — THE query of this codebase)
+
+**Concepts**
+- Fan-out-on-read vs fan-out-on-write: we JOIN through `follows` at read time;
+  Twitter precomputes per-follower feed rows at write time. Know why each
+  side wins and where the celebrity problem breaks read-time fan-out.
+- Keyset (cursor) pagination vs OFFSET: `WHERE (at, item_id) < (cursor)`
+  seeks via index and is stable under concurrent inserts; OFFSET re-reads and
+  discards rows and shifts under your feet. The cursor must be the FULL
+  ORDER BY key (timestamp alone isn't unique — ties need the id tiebreaker).
+- Opaque cursors: base64url of the sort key, validated on decode.
+- `UNION ALL` (no dedup sort) to merge heterogeneous activity sources.
+- Row-comparison semantics: `(a,b) < (x,y)` is lexicographic, matching
+  `ORDER BY a DESC, b DESC` exactly.
+
+**Try it**:
+```sql
+EXPLAIN ANALYZE
+SELECT r.* FROM reviews r
+ WHERE r.user_id IN (SELECT followee_id FROM follows WHERE follower_id = '<id>')
+ ORDER BY r.created_at DESC LIMIT 10;
+```
+
+**Question:** A new review lands between your page-1 and page-2 requests.
+Explain precisely why cursor pagination shows no duplicate/skip, and why
+OFFSET pagination would.
+
+## 8. Likes & comments (src/services/engagement.service.ts, LikeButton.tsx)
+
+**Concepts**
+- Optimistic UI: flip state locally, reconcile with the server's
+  authoritative count, roll back on failure.
+- Idempotency end-to-end: POST/DELETE pair + `skipDuplicates` on a composite
+  PK = retries and double-clicks are safe (HTTP semantics meet DB
+  constraints).
+- Ownership checks live in the service (403 vs 404 — and what each leaks).
+- Batched child loading: comments for 20 reviews in ONE `IN` query — the
+  N+1 problem and its standard fix.
+
+**Question:** The like count shown after your optimistic update can differ
+from the count the server returns. Why, and which one should win?
+
+## 9. The social graph (Follow, profiles, /people, middleware)
+
+**Concepts**
+- Directed graph as an edge list; the PK serves "who do I follow" (feed hot
+  path), the secondary index serves "who follows me" (counts).
+- Why middleware only checks cookie PRESENCE (Edge runtime, no DB) and the
+  real check stays server-side — defense in depth, not duplication.
+- `_count` correlated subqueries on the people directory; the denormalized
+  counter alternative is the Phase 2 exercise.
+
+**Question:** Why is the follower-count query `COUNT(*) WHERE followee_id=?`
+served index-only, and what changes (storage, write path, failure modes) if
+you denormalize it into `users.follower_count`?
+
+## 10. Seeding & external data (prisma/fetch-books.ts, prisma/seed.ts)
 
 **Concepts**
 - ETL separation: fetch (network, flaky, run once) is a different program

@@ -25,27 +25,61 @@ export const reviewRepository = {
     ]);
   },
 
+  findById(id: string) {
+    return prisma.review.findUnique({ where: { id } });
+  },
+
+  // Deleting a review cascades to its comments and likes (FK ON DELETE
+  // CASCADE), and we drop the star rating with it in the same transaction —
+  // "delete my review" means the opinion is gone, not just the text.
+  delete(reviewId: string, userId: string, bookId: string) {
+    return prisma.$transaction([
+      prisma.review.delete({ where: { id: reviewId } }),
+      prisma.rating.deleteMany({ where: { userId, bookId } }),
+    ]);
+  },
+
   // Reviews don't have an FK to ratings — they meet on (user_id, book_id).
   // Rather than a raw JOIN, fetch reviews then their authors' ratings in a
   // second indexed query and merge in JS. Two round-trips, both index-only;
   // contrast with the single-query raw SQL style in book.repository.search.
-  async listForBook(bookId: string, limit = 20) {
+  // Comments and like counts come along via include/_count — note this is
+  // ONE query for all reviews' comments, not one per review (no N+1).
+  async listForBook(bookId: string, viewerId: string | null, limit = 20) {
     const reviews = await prisma.review.findMany({
       where: { bookId },
-      include: { user: { select: { id: true, username: true } } },
+      include: {
+        user: { select: { id: true, username: true } },
+        comments: {
+          include: { user: { select: { id: true, username: true } } },
+          orderBy: { createdAt: "asc" },
+        },
+        _count: { select: { likes: true } },
+      },
       orderBy: { createdAt: "desc" }, // served by @@index([bookId, createdAt desc])
       take: limit,
     });
     if (reviews.length === 0) return [];
 
-    const ratings = await prisma.rating.findMany({
-      where: { bookId, userId: { in: reviews.map((r) => r.userId) } },
-    });
-    const byUser = new Map(ratings.map((r) => [r.userId, r.value]));
+    const reviewIds = reviews.map((r) => r.id);
+    const [ratings, myLikes] = await Promise.all([
+      prisma.rating.findMany({
+        where: { bookId, userId: { in: reviews.map((r) => r.userId) } },
+      }),
+      viewerId
+        ? prisma.like.findMany({
+            where: { userId: viewerId, reviewId: { in: reviewIds } },
+          })
+        : Promise.resolve([]),
+    ]);
+    const ratingByUser = new Map(ratings.map((r) => [r.userId, r.value]));
+    const likedIds = new Set(myLikes.map((l) => l.reviewId));
 
     return reviews.map((review) => ({
       ...review,
-      rating: byUser.get(review.userId) ?? null,
+      rating: ratingByUser.get(review.userId) ?? null,
+      likeCount: review._count.likes,
+      likedByMe: likedIds.has(review.id),
     }));
   },
 };
