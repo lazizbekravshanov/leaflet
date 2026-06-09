@@ -1,0 +1,321 @@
+// Leaflet schema. Every model documents its relations, its indexes (and why
+// they exist), and the design tradeoffs considered. Read top to bottom once —
+// it doubles as the data-model design doc.
+//
+// ── Global decisions ─────────────────────────────────────────────────────────
+//
+// IDs: cuid() strings, not autoincrement ints, not uuid v4.
+//   - autoincrement int: smallest/fastest joins, but leaks row counts in URLs
+//     and makes future sharding/merging painful (id collisions).
+//   - uuid v4: fully random, so consecutive inserts land on random B-tree
+//     pages (poor index locality, more page splits).
+//   - cuid: roughly time-ordered (good B-tree locality, like uuid v7) and
+//     generated client-side, so we can know an entity's id before the INSERT.
+//
+// Naming: every field/table is @map'ed to snake_case. Prisma would otherwise
+// create quoted camelCase columns ("userId"), which makes every raw SQL query
+// need double quotes. Since we deliberately write raw SQL for search/feed,
+// clean SQL identifiers are worth the @map noise.
+//
+// Soft deletes: NOT used. A deleted_at column means every query forever needs
+// WHERE deleted_at IS NULL, unique indexes must become partial, and FKs can
+// point at "deleted" rows. Hard delete + ON DELETE CASCADE keeps invariants in
+// the database. Revisit if/when moderation needs an undo window — that can be
+// added per-table (e.g. only Review) instead of globally.
+//
+// Join tables use composite primary keys (e.g. @@id([shelfId, bookId])), not a
+// surrogate id + unique constraint. The natural key makes duplicates
+// impossible by construction and the PK index *is* the lookup index — a
+// surrogate id would cost an extra column and an extra index for nothing.
+// Tradeoff: no single `id` to reference the row — acceptable because nothing
+// FKs into a join table.
+//
+// FK indexes: Postgres does NOT auto-index foreign key columns (it only
+// indexes the referenced PK side). Every FK we join or filter on gets an
+// explicit @@index, otherwise deletes on the parent and reverse lookups
+// ("all reviews for this book") become sequential scans.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7: the connection URL lives in prisma.config.ts (CLI) and in the
+// PrismaPg adapter (runtime), not here.
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Identity ────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid()) @map("id")
+  // citext would give case-insensitive uniqueness in the DB; we normalize to
+  // lowercase in the service layer instead, keeping the schema portable.
+  email        String   @unique @map("email")
+  username     String   @unique @map("username")
+  passwordHash String   @map("password_hash")
+  displayName  String?  @map("display_name")
+  bio          String?  @map("bio")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  sessions  Session[]
+  shelves   Shelf[]
+  reviews   Review[]
+  ratings   Rating[]
+  comments  Comment[]
+  likes     Like[]
+  // Self-referential many-to-many, split into the two directions of the
+  // Follow edge. "following" = Follow rows where I am the follower.
+  following Follow[]  @relation("follower")
+  followers Follow[]  @relation("followee")
+
+  @@map("users")
+}
+
+// One row per logged-in device/browser. Deleting a row IS logging out —
+// server-side sessions are revocable, which stateless JWTs are not (that is
+// the main reason this table exists).
+model Session {
+  id        String   @id @default(cuid()) @map("id")
+  // SHA-256 of the random token. The cookie holds the raw token; the DB holds
+  // only the hash, so a leaked DB dump cannot be replayed as a login.
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // userId: "log out everywhere" deletes by user. expiresAt: a cleanup job
+  // ranges over expired rows; without this index it scans the whole table.
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ── Catalog ─────────────────────────────────────────────────────────────────
+
+model Author {
+  id            String  @id @default(cuid()) @map("id")
+  // Open Library author key (e.g. "OL79034A") — our dedupe key on import.
+  openLibraryId String? @unique @map("open_library_id")
+  name          String  @map("name")
+  bio           String? @map("bio")
+
+  books BookAuthor[]
+
+  @@index([name])
+  @@map("authors")
+}
+
+model Book {
+  id            String   @id @default(cuid()) @map("id")
+  // Open Library *work* key (e.g. "OL893415W"). A work groups all editions of
+  // a book; shelving/reviewing the work (not an edition) matches what users
+  // mean by "I read Dune". Editions can become a child table later.
+  openLibraryId String   @unique @map("open_library_id")
+  title         String   @map("title")
+  description   String?  @map("description")
+  // Open Library cover id; rendered as covers.openlibrary.org/b/id/{id}-M.jpg.
+  // We store the id, not the URL, so the size variant stays a render concern.
+  coverId       Int?     @map("cover_id")
+  publishedYear Int?     @map("published_year")
+  pageCount     Int?     @map("page_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  authors    BookAuthor[]
+  shelfItems ShelfItem[]
+  reviews    Review[]
+  ratings    Rating[]
+
+  // No B-tree index on title: search uses ILIKE '%term%', which a B-tree
+  // cannot serve (no fixed prefix). The migration adds a pg_trgm GIN index
+  // instead — compare EXPLAIN ANALYZE with and without it.
+  @@map("books")
+}
+
+// Books ↔ Authors is many-to-many (co-authored books, prolific authors).
+// Explicit join model instead of Prisma's implicit M2M because we need a
+// payload column (position) and control over the table name for raw SQL.
+model BookAuthor {
+  bookId   String @map("book_id")
+  authorId String @map("author_id")
+  // Author order matters for display: "Good Omens — Pratchett, Gaiman".
+  position Int    @default(0) @map("position")
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // PK covers (bookId, …) lookups; the extra index covers the reverse
+  // direction, "all books by this author".
+  @@id([bookId, authorId])
+  @@index([authorId])
+  @@map("book_authors")
+}
+
+// ── Shelving ────────────────────────────────────────────────────────────────
+
+enum ShelfType {
+  WANT_TO_READ
+  READING
+  READ
+  CUSTOM
+}
+
+// Design choice: one unified Shelf model for both system shelves and custom
+// shelves, rather than a `status` enum on a UserBook row plus a separate
+// custom-shelf structure.
+//   + one set of tables/queries handles both kinds
+//   + custom shelves are first-class from day one
+//   - the invariant "a book sits on at most one of the three system shelves"
+//     is NOT expressible as a constraint here; ShelfService enforces it in a
+//     transaction (move semantics). The alternative design gets that invariant
+//     for free (one status column) but models custom shelves twice.
+// The migration adds a partial unique index so each user has at most one
+// shelf of each system type: UNIQUE (user_id, type) WHERE type <> 'CUSTOM'.
+model Shelf {
+  id        String    @id @default(cuid()) @map("id")
+  userId    String    @map("user_id")
+  name      String    @map("name")
+  type      ShelfType @map("type")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ShelfItem[]
+
+  // Doubles as the FK index on user_id (leftmost column of a composite
+  // B-tree index is usable alone).
+  @@unique([userId, name])
+  @@map("shelves")
+}
+
+model ShelfItem {
+  shelfId String   @map("shelf_id")
+  bookId  String   @map("book_id")
+  addedAt DateTime @default(now()) @map("added_at")
+
+  shelf Shelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
+  book  Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // Composite PK = can't shelve the same book twice on one shelf.
+  @@id([shelfId, bookId])
+  // Reverse lookup: "how many people shelved this book".
+  @@index([bookId])
+  @@map("shelf_items")
+}
+
+// ── Reviews & ratings ───────────────────────────────────────────────────────
+
+// Rating is a separate table, NOT a column on Review. Considered both:
+//   rating column on Review:
+//     + one write, no join to show "★★★★ + text"
+//     - can't rate without reviewing (most Goodreads ratings have no text)
+//   separate Rating table (chosen):
+//     + rating-only is natural; the aggregate query (AVG over a narrow
+//       4-column table) touches far fewer pages than scanning review text rows
+//     - showing a review with its author's star count needs a join on
+//       (user_id, book_id), and "review + rate" is two writes (one transaction)
+// The join is cheap (both sides PK/unique-indexed); the flexibility is not.
+model Review {
+  id        String   @id @default(cuid()) @map("id")
+  userId    String   @map("user_id")
+  bookId    String   @map("book_id")
+  body      String   @map("body")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book     Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  comments Comment[]
+  likes    Like[]
+
+  // One review per user per book; editing updates in place.
+  @@unique([userId, bookId])
+  // The book page lists reviews newest-first: WHERE book_id = ? ORDER BY
+  // created_at DESC. This composite index serves filter AND order in one
+  // B-tree walk — no sort step. Check the plan: it should say
+  // "Index Scan Backward" or use the DESC index, never "Sort".
+  @@index([bookId, createdAt(sort: Desc)])
+  @@map("reviews")
+}
+
+model Rating {
+  userId    String   @map("user_id")
+  bookId    String   @map("book_id")
+  // 1..5 — SmallInt because the domain fits in 2 bytes; the actual range
+  // check is a CHECK constraint in the migration (Prisma can't express it).
+  value     Int      @db.SmallInt @map("value")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // One rating per user per book, and the PK index serves the join from
+  // Review (user_id, book_id) for free.
+  @@id([userId, bookId])
+  // AVG/COUNT per book reads this index instead of the table.
+  @@index([bookId])
+  @@map("ratings")
+}
+
+model Comment {
+  id        String   @id @default(cuid()) @map("id")
+  reviewId  String   @map("review_id")
+  userId    String   @map("user_id")
+  body      String   @map("body")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Comments render oldest-first under a review (conversation order).
+  @@index([reviewId, createdAt])
+  @@index([userId])
+  @@map("comments")
+}
+
+// Like targets Review only. Considered a polymorphic Like (target_type +
+// target_id) covering reviews/comments/etc.:
+//   - polymorphic target_id can't be a real FK → orphans possible, no cascade
+//   + one table for all likeables
+// Real FKs win at this scale; if comments become likeable, a second small
+// table (comment_likes) costs one migration and keeps integrity.
+model Like {
+  userId    String   @map("user_id")
+  reviewId  String   @map("review_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  // Composite PK = can't like twice; covers "did I like this?" lookups.
+  @@id([userId, reviewId])
+  // Like counts per review.
+  @@index([reviewId])
+  @@map("likes")
+}
+
+// ── Social graph ────────────────────────────────────────────────────────────
+
+// Follow is the self-referential many-to-many on User, stored as an edge
+// list: one row per directed edge follower → followee. This is the adjacency
+// representation of a directed graph in SQL.
+model Follow {
+  followerId String   @map("follower_id")
+  followeeId String   @map("followee_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  follower User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followee User @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
+
+  // PK serves "who do I follow" (feed building, the hot path).
+  @@id([followerId, followeeId])
+  // Index serves "who follows me" (follower counts, notifications).
+  @@index([followeeId])
+  // "You can't follow yourself" is a CHECK constraint in the migration.
+  @@map("follows")
+}

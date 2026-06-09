@@ -1,0 +1,17 @@
+# Local PostgreSQL for development. Production uses Neon.
+# Start:  docker compose up -d
+# Stop:   docker compose down        (add -v to also wipe data)
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: leaflet
+      POSTGRES_PASSWORD: leaflet
+      POSTGRES_DB: leaflet
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
