@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
-export function LogoutButton() {
+export function LogoutButton({
+  className = "text-ink-secondary hover:text-accent",
+}: {
+  className?: string;
+}) {
   const router = useRouter();
 
   async function logout() {
@@ -14,7 +18,7 @@ export function LogoutButton() {
   }
 
   return (
-    <button onClick={logout} className="text-neutral-500 hover:underline">
+    <button onClick={logout} className={className}>
       Log out
     </button>
   );

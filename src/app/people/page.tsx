@@ -17,39 +17,40 @@ export default async function PeoplePage() {
   const followingIds = new Set(myFollows.map((f) => f.followeeId));
 
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold">People</h1>
-        <p className="text-sm text-neutral-500">
-          Follow readers to fill your feed.
-        </p>
-      </header>
-      <div className="flex flex-col gap-3">
+    <div className="mx-auto max-w-[640px] px-5 py-12">
+      <h1 className="font-display text-[28px] font-semibold">People</h1>
+      <p className="mt-1 text-[15px] text-ink-secondary">
+        Follow readers to fill your feed.
+      </p>
+      <div className="mt-8 divide-y divide-line">
         {people
           .filter((p) => p.id !== viewer.id)
           .map((person) => (
-            <div
-              key={person.id}
-              className="flex items-center gap-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800"
-            >
-              <Avatar
-                username={person.username}
-                avatarUrl={person.avatarUrl}
-                size="md"
-              />
+            <div key={person.id} className="flex items-center gap-4 py-5">
+              <Link
+                href={`/users/${person.username}`}
+                aria-label={`${person.username}'s profile`}
+                className="shrink-0 rounded-full"
+              >
+                <Avatar
+                  username={person.username}
+                  avatarUrl={person.avatarUrl}
+                  size="md"
+                />
+              </Link>
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/users/${person.username}`}
-                  className="font-medium hover:underline"
+                  className="text-[15px] font-medium hover:text-accent"
                 >
-                  @{person.username}
+                  {person.username}
                 </Link>
                 {person.bio && (
-                  <p className="truncate text-sm text-neutral-500">
+                  <p className="truncate text-[15px] text-ink-secondary">
                     {person.bio}
                   </p>
                 )}
-                <p className="text-xs text-neutral-400">
+                <p className="tnum mt-0.5 text-[13px] text-ink-secondary">
                   {person._count.followers} follower
                   {person._count.followers === 1 ? "" : "s"} ·{" "}
                   {person._count.reviews} review

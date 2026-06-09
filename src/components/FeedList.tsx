@@ -4,9 +4,8 @@ import { useState } from "react";
 import { FeedCard } from "@/components/FeedCard";
 import type { FeedItemDto, FeedPageDto } from "@/lib/feed-types";
 
-// First page arrives server-rendered (props); "Load more" appends pages via
-// the API using the opaque cursor. Keyset pagination means loading more can
-// never duplicate or skip an item, even while new activity lands.
+// Hairline rules between items, not boxes. First page arrives
+// server-rendered; "Load more" is a quiet text button, not a spinner.
 export function FeedList({
   initialItems,
   initialCursor,
@@ -31,18 +30,22 @@ export function FeedList({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {items.map((item) => (
-        <FeedCard key={`${item.kind}:${item.itemId}`} item={item} />
-      ))}
+    <div>
+      <div className="divide-y divide-line">
+        {items.map((item) => (
+          <FeedCard key={`${item.kind}:${item.itemId}`} item={item} />
+        ))}
+      </div>
       {cursor && (
-        <button
-          onClick={loadMore}
-          disabled={busy}
-          className="self-center rounded border border-neutral-300 px-4 py-2 text-sm hover:border-accent disabled:opacity-50 dark:border-neutral-700"
-        >
-          {busy ? "Loading…" : "Load more"}
-        </button>
+        <div className="border-t border-line py-6 text-center">
+          <button
+            onClick={loadMore}
+            disabled={busy}
+            className="text-[15px] text-ink-secondary transition-colors duration-150 hover:text-accent disabled:opacity-50"
+          >
+            {busy ? "Loading" : "Load more"}
+          </button>
+        </div>
       )}
     </div>
   );

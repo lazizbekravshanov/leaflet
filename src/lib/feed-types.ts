@@ -9,6 +9,7 @@ export type FeedItemDto = {
   avatarUrl: string | null;
   bookId: string;
   bookTitle: string;
+  bookAuthors: string | null;
   coverId: number | null;
   // review-only fields (null for shelved items)
   reviewId: string | null;

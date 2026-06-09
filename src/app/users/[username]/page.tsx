@@ -6,21 +6,16 @@ import { userService } from "@/services/user.service";
 import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { BookCover } from "@/components/BookCover";
+import { ProfileTabs } from "@/components/ProfileTabs";
+import { Stars } from "@/components/icons";
+import { timeAgo } from "@/lib/time";
 
-// Tabs live in the URL (?tab=reviews) instead of client state: the page stays
-// a server component, tabs are linkable, and back/forward works.
 export default async function ProfilePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ username: string }>;
-  searchParams: Promise<{ tab?: string }>;
 }) {
-  const [{ username }, { tab }, viewer] = await Promise.all([
-    params,
-    searchParams,
-    getCurrentUser(),
-  ]);
+  const [{ username }, viewer] = await Promise.all([params, getCurrentUser()]);
 
   let profile;
   try {
@@ -33,115 +28,135 @@ export default async function ProfilePage({
     throw e;
   }
   const { user, counts, isFollowing, shelves, reviews } = profile;
-  const activeTab = tab === "reviews" ? "reviews" : "shelves";
   const isMe = viewer?.id === user.id;
+  const allShelved = shelves.flatMap((s) =>
+    s.items.map((item) => ({ shelf: s.name, ...item })),
+  );
 
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex items-center gap-5">
+    <div className="mx-auto max-w-[1080px] px-5 py-12">
+      <header className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <Avatar username={user.username} avatarUrl={user.avatarUrl} size="lg" />
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">@{user.username}</h1>
-          {user.bio && <p className="text-sm text-neutral-500">{user.bio}</p>}
-          <p className="text-sm text-neutral-500">
-            <strong>{counts.followers}</strong> follower
-            {counts.followers === 1 ? "" : "s"} ·{" "}
-            <strong>{counts.following}</strong> following ·{" "}
-            <strong>{reviews.length}</strong> review
-            {reviews.length === 1 ? "" : "s"}
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display text-[28px] font-semibold">
+            {user.username}
+          </h1>
+          <p className="mt-0.5 text-[15px] text-ink-secondary">
+            @{user.username}
+            {user.bio && <> · {user.bio}</>}
+          </p>
+          <p className="tnum mt-1.5 text-[15px] text-ink-secondary">
+            {counts.followers} follower{counts.followers === 1 ? "" : "s"} ·{" "}
+            {counts.following} following
           </p>
         </div>
         {viewer && !isMe && (
-          <span className="ml-auto">
-            <FollowButton
-              username={user.username}
-              initialFollowing={isFollowing}
-            />
-          </span>
+          <FollowButton username={user.username} initialFollowing={isFollowing} />
+        )}
+        {isMe && (
+          <Link
+            href="/settings"
+            className="rounded-control border border-line px-4 py-1.5 text-[15px] text-ink-secondary transition-colors duration-150 hover:text-ink"
+          >
+            Edit profile
+          </Link>
         )}
       </header>
 
-      <nav className="flex gap-4 border-b border-neutral-200 text-sm dark:border-neutral-800">
-        {(["shelves", "reviews"] as const).map((t) => (
-          <Link
-            key={t}
-            href={`/users/${user.username}${t === "reviews" ? "?tab=reviews" : ""}`}
-            className={`-mb-px border-b-2 px-1 pb-2 capitalize ${
-              activeTab === t
-                ? "border-accent font-medium"
-                : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-            }`}
-          >
-            {t}
-          </Link>
-        ))}
-      </nav>
+      <div className="mt-10">
+        <ProfileTabs
+          labels={["Reviews", "Shelves"]}
+          panels={[
+            <ReviewsPanel key="r" reviews={reviews} />,
+            <ShelvesPanel key="s" items={allShelved} />,
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
 
-      {activeTab === "shelves" ? (
-        <div className="flex flex-col gap-6">
-          {shelves.map((shelf) => (
-            <section key={shelf.id}>
-              <h2 className="mb-2 font-medium">
-                {shelf.name}{" "}
-                <span className="text-sm font-normal text-neutral-500">
-                  ({shelf.items.length})
-                </span>
-              </h2>
-              {shelf.items.length === 0 ? (
-                <p className="text-sm text-neutral-500">Empty.</p>
-              ) : (
-                <div className="flex flex-wrap gap-3">
-                  {shelf.items.map((item) => (
-                    <Link
-                      key={item.bookId}
-                      href={`/books/${item.bookId}`}
-                      title={item.book.title}
-                    >
-                      <BookCover
-                        coverId={item.book.coverId}
-                        title={item.book.title}
-                        size="S"
-                      />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {reviews.length === 0 && (
-            <p className="text-sm text-neutral-500">No reviews yet.</p>
-          )}
-          {reviews.map((review) => (
-            <article
-              key={review.id}
-              className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800"
+function ReviewsPanel({
+  reviews,
+}: {
+  reviews: Array<{
+    id: string;
+    bookId: string;
+    body: string;
+    createdAt: Date;
+    rating: number | null;
+    book: { title: string };
+  }>;
+}) {
+  if (reviews.length === 0) {
+    return <p className="text-[15px] text-ink-secondary">No reviews yet.</p>;
+  }
+  return (
+    <div className="mx-auto max-w-[640px] divide-y divide-line">
+      {reviews.map((review) => (
+        <article key={review.id} className="py-6">
+          <div className="flex items-baseline gap-3">
+            <h3 className="font-display min-w-0 truncate text-[21px] font-semibold">
+              <Link href={`/books/${review.bookId}`} className="hover:text-accent">
+                {review.book.title}
+              </Link>
+            </h3>
+            <time
+              dateTime={review.createdAt.toISOString()}
+              className="ml-auto shrink-0 text-[13px] text-ink-secondary"
             >
-              <div className="mb-1 flex items-center gap-2 text-sm">
-                <Link
-                  href={`/books/${review.bookId}`}
-                  className="font-medium hover:underline"
-                >
-                  {review.book.title}
-                </Link>
-                {review.rating !== null && (
-                  <span className="text-amber-500">
-                    {"★".repeat(review.rating)}
-                  </span>
-                )}
-                <span className="text-neutral-400">
-                  {review.createdAt.toLocaleDateString()}
-                </span>
-              </div>
-              <p className="line-clamp-3 whitespace-pre-line text-sm">
-                {review.body}
-              </p>
-            </article>
-          ))}
-        </div>
-      )}
+              {timeAgo(review.createdAt)}
+            </time>
+          </div>
+          {review.rating !== null && (
+            <div className="mt-1.5">
+              <Stars value={review.rating} />
+            </div>
+          )}
+          <p className="mt-2.5 line-clamp-3 text-[17px] leading-[1.6]">
+            {review.body}
+          </p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ShelvesPanel({
+  items,
+}: {
+  items: Array<{
+    shelf: string;
+    bookId: string;
+    book: { title: string; coverId: number | null; authors: Array<{ author: { name: string } }> };
+  }>;
+}) {
+  if (items.length === 0) {
+    return <p className="text-[15px] text-ink-secondary">Nothing shelved yet.</p>;
+  }
+  return (
+    <div className="grid grid-cols-3 gap-x-5 gap-y-8 sm:grid-cols-4 md:grid-cols-6">
+      {items.map((item) => (
+        <Link
+          key={`${item.shelf}:${item.bookId}`}
+          href={`/books/${item.bookId}`}
+          className="group"
+        >
+          <div className="transition-transform duration-200 ease-(--ease) group-hover:scale-[1.02]">
+            <BookCover
+              coverId={item.book.coverId}
+              title={item.book.title}
+              size="full"
+            />
+          </div>
+          <p className="mt-2 truncate text-[13px] font-medium">
+            {item.book.title}
+          </p>
+          <p className="truncate text-[13px] text-ink-secondary">
+            {item.book.authors.map((a) => a.author.name).join(", ")}
+          </p>
+        </Link>
+      ))}
     </div>
   );
 }

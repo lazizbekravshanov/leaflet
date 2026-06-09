@@ -1,44 +1,113 @@
 @import "tailwindcss";
 
-/* Editorial, book-ish palette: warm paper background, soft ink text, deep
-   green accent. Tokens live here; components reference them as Tailwind
-   classes (bg-accent, text-ink, …) via the @theme mapping below. */
+/* ── Design tokens ──────────────────────────────────────────────────────────
+   Near-monochrome. One accent. Hairlines instead of shadows. Every value
+   here is the single source of truth — components reference tokens, never
+   raw colors. Light mode only by design. */
 :root {
-  --paper: #faf6ee;
-  --ink: #26201a;
-  --accent: #1e5639; /* deep green */
-  --accent-deep: #16412b;
+  --bg: #ffffff;
+  --bg-subtle: #f5f5f7;
+  --ink: #1d1d1f;
+  --ink-secondary: #6e6e73;
+  /* Tertiary fails WCAG AA as text (2.3:1) — reserved for placeholders and
+     disabled states only. Meta text uses --ink-secondary. */
+  --ink-tertiary: #aeaeb2;
+  --line: rgba(0, 0, 0, 0.08);
+  --accent: #0e4f3f;
+  --accent-hover: #0b4234;
+  /* The one shadow in the product — floating elements only (dropdown,
+     scrolled nav). Cards get hairline borders, never shadows. */
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 @theme inline {
-  --color-paper: var(--paper);
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
   --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-tertiary: var(--ink-tertiary);
+  --color-line: var(--line);
   --color-accent: var(--accent);
-  --color-accent-deep: var(--accent-deep);
-  --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-fraunces);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #17130e;
-    --ink: #ece5d8;
-    --accent: #3f8d63;
-    --accent-deep: #56a87c;
-  }
+  --color-accent-hover: var(--accent-hover);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-newsreader);
+  /* Radii: controls 6, cards/covers 10, pills 999. Nothing else. */
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --shadow-float: var(--shadow-float);
+  --ease-out-quad: var(--ease);
 }
 
 body {
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), -apple-system, "SF Pro Text", sans-serif;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Serif display face for headings, app-wide — one rule instead of a
-   font-display class on every h1. */
-h1,
-h2,
-h3 {
-  font-family: var(--font-fraunces), Georgia, serif;
-  letter-spacing: -0.01em;
+/* Display serif: hero, page titles, book titles. Never buttons or labels. */
+.font-display {
+  font-family: var(--font-newsreader), Georgia, serif;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+/* Counts and meta numbers never reflow as they tick. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keyboard: one visible, consistent focus treatment everywhere. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* One-time entrance: 10px rise + fade, used sparingly on landing sections. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal {
+  opacity: 0;
+}
+.reveal[data-shown] {
+  animation: rise 240ms var(--ease) forwards;
+}
+
+/* Smooth "More" expansion (grid-rows trick: animatable auto height). */
+.expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms var(--ease);
+}
+.expand[data-open] {
+  grid-template-rows: 1fr;
+}
+.expand > * {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+  .reveal {
+    opacity: 1;
+  }
 }

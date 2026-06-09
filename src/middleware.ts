@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // request (requireUser / getCurrentUser hit the sessions table). A forged
 // cookie gets past this redirect and then sees signed-out pages anyway —
 // nothing is trusted from the cookie's presence alone.
-const PROTECTED_PREFIXES = ["/shelves", "/people"];
+const PROTECTED_PREFIXES = ["/shelves", "/people", "/settings"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/shelves/:path*", "/people/:path*"],
+  matcher: ["/shelves/:path*", "/people/:path*", "/settings/:path*"],
 };

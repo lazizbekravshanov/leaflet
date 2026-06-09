@@ -14,19 +14,24 @@ export default async function BooksPage({
   const { q } = await searchParams;
 
   return (
-    <div className="flex flex-col gap-6">
-      <SearchForm defaultValue={q ?? ""} />
-      {q ? (
-        // key={q}: a NEW search re-suspends and shows the skeleton again
-        // instead of keeping stale results on screen.
-        <Suspense key={q} fallback={<SearchResultsSkeleton />}>
-          <SearchResults q={q} />
-        </Suspense>
-      ) : (
-        <p className="text-center text-sm text-neutral-500">
-          Try “dune”, “orwell”, or “murakami” — the seed has 50 books.
-        </p>
-      )}
+    <div className="mx-auto max-w-[1080px] px-5 py-12">
+      <h1 className="font-display text-[28px] font-semibold">Browse</h1>
+      <div className="mt-6">
+        <SearchForm defaultValue={q ?? ""} />
+      </div>
+      <div className="mt-8">
+        {q ? (
+          // key={q}: a NEW search re-suspends and shows the skeleton again
+          // instead of keeping stale results on screen.
+          <Suspense key={q} fallback={<SearchResultsSkeleton />}>
+            <SearchResults q={q} />
+          </Suspense>
+        ) : (
+          <p className="text-[15px] text-ink-secondary">
+            Search the catalog by title or author.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -36,10 +41,10 @@ async function SearchResults({ q }: { q: string }) {
 
   return (
     <>
-      <p className="text-sm text-neutral-500">
+      <p className="tnum text-[13px] text-ink-secondary">
         {results.length} result{results.length === 1 ? "" : "s"} for “{q}”
       </p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-x-8 gap-y-6 sm:grid-cols-2">
         {results.map((book) => (
           <BookCard key={book.id} book={book} />
         ))}

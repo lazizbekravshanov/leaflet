@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-// Optimistic UI: state flips instantly on click, then the request runs. On
-// failure we roll back to the snapshot. The POST/DELETE pair is idempotent
-// server-side (composite PK + skipDuplicates), so a retry can't double-count.
+// A text button, not an icon in a circle. Optimistic: state flips instantly
+// — fill, no bounce — then reconciles with the server's count. The
+// POST/DELETE pair is idempotent server-side, so retries can't double-count.
 export function LikeButton({
   reviewId,
   initialCount,
@@ -32,8 +32,6 @@ export function LikeButton({
       setCount(snapshot.count);
       return;
     }
-    // Reconcile with the server's authoritative count (another user may
-    // have liked in between).
     const data = (await res.json()) as { count: number };
     setCount(data.count);
   }
@@ -42,12 +40,16 @@ export function LikeButton({
     <button
       onClick={toggle}
       disabled={disabled}
+      aria-pressed={liked}
       title={disabled ? "Log in to like reviews" : undefined}
-      className={`flex items-center gap-1 text-sm disabled:opacity-50 ${
-        liked ? "text-rose-700" : "text-neutral-500 hover:text-rose-700"
+      className={`tnum transition-colors duration-150 disabled:opacity-50 ${
+        liked
+          ? "font-medium text-accent"
+          : "text-ink-secondary hover:text-accent"
       }`}
     >
-      {liked ? "♥" : "♡"} {count}
+      {liked ? "Liked" : "Like"}
+      {count > 0 ? ` ${count}` : ""}
     </button>
   );
 }

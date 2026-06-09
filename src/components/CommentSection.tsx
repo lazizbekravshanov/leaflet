@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { timeAgo } from "@/lib/time";
 
 export type CommentItem = {
   id: string;
@@ -10,6 +11,8 @@ export type CommentItem = {
   createdAt: string;
 };
 
+// A text disclosure ("Comments 3"), not an icon button. Expanded comments sit
+// behind a hairline left rule, conversation order.
 export function CommentSection({
   reviewId,
   initialComments,
@@ -57,43 +60,48 @@ export function CommentSection({
   }
 
   return (
-    <div className="text-sm">
+    <div className="min-w-0 flex-1 text-[15px]">
       <button
         onClick={() => setOpen(!open)}
-        className="text-neutral-500 hover:underline"
+        aria-expanded={open}
+        className="tnum text-ink-secondary transition-colors duration-150 hover:text-accent"
       >
-        💬 {comments.length}
+        {comments.length === 0 ? "Comment" : `Comments ${comments.length}`}
       </button>
       {open && (
-        <div className="mt-3 flex flex-col gap-2 border-l-2 border-neutral-200 pl-3 dark:border-neutral-700">
+        <div className="mt-4 flex flex-col gap-3 border-l border-line pl-4">
           {comments.map((c) => (
-            <div key={c.id} className="flex items-baseline gap-2">
-              <span className="font-medium">@{c.username}</span>
+            <div key={c.id} className="flex items-baseline gap-2 text-[15px]">
+              <span className="shrink-0 font-medium">{c.username}</span>
               <span className="min-w-0 flex-1">{c.body}</span>
+              <span className="shrink-0 text-[13px] text-ink-secondary">
+                {timeAgo(c.createdAt)}
+              </span>
               {c.userId === currentUserId && (
                 <button
                   onClick={() => remove(c.id)}
-                  className="text-xs text-neutral-400 hover:text-red-600"
+                  className="shrink-0 text-[13px] text-ink-secondary hover:text-ink"
                 >
-                  delete
+                  Delete
                 </button>
               )}
             </div>
           ))}
           {currentUserId && (
-            <form onSubmit={post} className="mt-1 flex gap-2">
+            <form onSubmit={post} className="flex gap-2 pt-1">
               <input
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 required
                 maxLength={2000}
-                placeholder="Add a comment…"
-                className="flex-1 rounded border border-neutral-300 px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+                placeholder="Add a comment"
+                aria-label="Add a comment"
+                className="flex-1 rounded-control bg-bg-subtle px-3 py-1.5 text-[15px] placeholder:text-ink-tertiary"
               />
               <button
                 type="submit"
                 disabled={busy}
-                className="text-accent hover:underline disabled:opacity-50"
+                className="text-[15px] font-medium text-accent transition-colors duration-150 hover:text-accent-hover disabled:opacity-50"
               >
                 Post
               </button>

@@ -1,4 +1,5 @@
-import { NotFoundError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { requireString } from "@/lib/validate";
 import { userRepository } from "@/repositories/user.repository";
 import { followRepository } from "@/repositories/follow.repository";
 import { shelfRepository } from "@/repositories/shelf.repository";
@@ -41,4 +42,25 @@ export const userService = {
   listPeople() {
     return userRepository.listAll();
   },
+
+  // Settings form. Empty strings normalize to NULL — "cleared" and "never
+  // set" are the same state, and the UI shouldn't render empty bios.
+  async updateProfile(
+    userId: string,
+    input: { displayName: unknown; bio: unknown; avatarUrl: unknown },
+  ) {
+    const displayName = optionalString(input.displayName, "display name", 50);
+    const bio = optionalString(input.bio, "bio", 280);
+    const avatarUrl = optionalString(input.avatarUrl, "avatar URL", 300);
+    if (avatarUrl !== null && !/^https:\/\/.+/.test(avatarUrl)) {
+      throw new ValidationError("Avatar URL must start with https://");
+    }
+    return userRepository.updateProfile(userId, { displayName, bio, avatarUrl });
+  },
 };
+
+function optionalString(value: unknown, field: string, max: number): string | null {
+  if (value === undefined || value === null) return null;
+  const s = requireString(value, field, { max });
+  return s.length === 0 ? null : s;
+}

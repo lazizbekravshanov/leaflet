@@ -1,12 +1,13 @@
+import Link from "next/link";
 import { LikeButton } from "@/components/LikeButton";
 import { CommentSection, type CommentItem } from "@/components/CommentSection";
 import { DeleteButton } from "@/components/DeleteButton";
 import { ExpandableText } from "@/components/ExpandableText";
-import Link from "next/link";
+import { Stars } from "@/components/icons";
+import { timeAgo } from "@/lib/time";
 
-// Server component shell with client islands (like, comments, delete) only
-// where there's interaction. Dates cross the server→client boundary as
-// strings — props must be serializable.
+// A review on the book page: hairline-ruled row (the list supplies divide-y),
+// client islands only where there's interaction.
 export type ReviewCardData = {
   id: string;
   body: string;
@@ -39,28 +40,28 @@ export function ReviewCard({
   }));
 
   return (
-    <article className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
-      <div className="mb-2 flex items-center gap-2 text-sm">
+    <article className="py-6">
+      <div className="flex items-center gap-2 text-[13px] text-ink-secondary">
         <Link
           href={`/users/${review.user.username}`}
-          className="font-medium hover:underline"
+          className="font-medium text-ink hover:text-accent"
         >
-          @{review.user.username}
+          {review.user.username}
         </Link>
-        {review.rating !== null && (
-          <span className="text-amber-500">{"★".repeat(review.rating)}</span>
-        )}
-        <span className="text-neutral-400">
-          {review.createdAt.toLocaleDateString()}
-        </span>
+        {review.rating !== null && <Stars value={review.rating} />}
+        <time dateTime={review.createdAt.toISOString()}>
+          {timeAgo(review.createdAt)}
+        </time>
         {currentUserId === review.user.id && (
           <span className="ml-auto">
-            <DeleteButton url={`/api/reviews/${review.id}`} label="delete" />
+            <DeleteButton url={`/api/reviews/${review.id}`} label="Delete" />
           </span>
         )}
       </div>
-      <ExpandableText text={review.body} />
-      <div className="mt-3 flex items-center gap-4">
+      <div className="mt-3">
+        <ExpandableText text={review.body} />
+      </div>
+      <div className="mt-3 flex items-center gap-6 text-[15px]">
         <LikeButton
           reviewId={review.id}
           initialCount={review.likeCount}

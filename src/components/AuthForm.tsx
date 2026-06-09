@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// One form for signup and login — they differ only by the username field and
-// the endpoint. Client component because we want inline error messages from
-// the API instead of a full-page round trip.
+const FIELD =
+  "w-full rounded-control bg-bg-subtle px-3.5 py-2.5 text-[15px] placeholder:text-ink-tertiary";
+
+// One form for signup and login — they differ by the username field and the
+// endpoint. Errors are plain sentences in ink, inline under the form.
 export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -25,32 +27,38 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
 
     if (!res.ok) {
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
-      setError(data?.error ?? "Something went wrong");
+      setError(data?.error ?? "Something went wrong. Try again.");
       setBusy(false);
       return;
     }
-    // Session cookie is now set; refresh re-renders the server components
-    // (Nav greeting, shelves) with the new auth state.
-    router.push("/books");
+    // Session cookie is set; refresh re-renders the server components (nav,
+    // feed) with the new auth state.
+    router.push("/");
     router.refresh();
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex max-w-sm flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm">
-        Email
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="email" className="text-[13px] font-medium">
+          Email
+        </label>
         <input
+          id="email"
           name="email"
           type="email"
           required
           autoComplete="email"
-          className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+          className={FIELD}
         />
-      </label>
+      </div>
       {mode === "signup" && (
-        <label className="flex flex-col gap-1 text-sm">
-          Username
+        <div className="flex flex-col gap-2">
+          <label htmlFor="username" className="text-[13px] font-medium">
+            Username
+          </label>
           <input
+            id="username"
             name="username"
             required
             minLength={3}
@@ -58,28 +66,35 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
             pattern="[a-z0-9_]+"
             title="lowercase letters, digits, underscore"
             autoComplete="username"
-            className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className={FIELD}
           />
-        </label>
+        </div>
       )}
-      <label className="flex flex-col gap-1 text-sm">
-        Password
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password" className="text-[13px] font-medium">
+          Password
+        </label>
         <input
+          id="password"
           name="password"
           type="password"
           required
           minLength={mode === "signup" ? 8 : 1}
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+          className={FIELD}
         />
-      </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      </div>
+      {error && (
+        <p role="alert" className="text-[15px]">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={busy}
-        className="rounded bg-accent py-2 text-white hover:bg-accent-deep disabled:opacity-50"
+        className="mt-2 w-full rounded-control bg-accent py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover disabled:opacity-50"
       >
-        {mode === "signup" ? "Create account" : "Log in"}
+        {mode === "signup" ? "Create your shelf" : "Log in"}
       </button>
     </form>
   );

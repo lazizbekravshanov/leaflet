@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist } from "next/font/google";
+import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
-  // Fraunces is a variable font; the optical-size axis gives the big
-  // headings their bookish look at display sizes.
+  // Optical sizing is what makes the serif feel set, not typed, at 64px.
   axes: ["opsz"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
   title: "Leaflet",
-  description: "Track what you read. A Goodreads alternative.",
+  description: "Every book you read, remembered.",
 };
 
 export default function RootLayout({
@@ -22,9 +23,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} ${fraunces.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${newsreader.variable} flex min-h-svh flex-col antialiased`}
+      >
         <Nav />
-        <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+        {/* Bare main: pages own their containers, so the landing page can
+            run full-bleed alternating sections while app pages use the
+            1080px content column. */}
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

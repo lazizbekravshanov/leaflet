@@ -22,6 +22,13 @@ export const userRepository = {
     return prisma.user.findUnique({ where: { username } });
   },
 
+  updateProfile(
+    id: string,
+    data: { displayName: string | null; bio: string | null; avatarUrl: string | null },
+  ) {
+    return prisma.user.update({ where: { id }, data });
+  },
+
   // The people directory: every user plus relationship counts. _count maps
   // to correlated COUNT subqueries — fine at directory scale; a denormalized
   // follower_count column is the Phase 2 lesson if this ever gets hot.

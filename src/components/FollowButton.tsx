@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Optimistic follow/unfollow — same pattern as LikeButton, idempotent
-// POST/DELETE pair server-side.
+// Accent-filled when not following; quiet hairline outline once following.
+// Optimistic, idempotent POST/DELETE pair server-side.
 export function FollowButton({
   username,
   initialFollowing,
@@ -31,10 +31,10 @@ export function FollowButton({
   return (
     <button
       onClick={toggle}
-      className={`rounded px-3 py-1.5 text-sm ${
+      className={`rounded-control px-4 py-1.5 text-[15px] font-medium transition-colors duration-150 ${
         following
-          ? "border border-neutral-300 hover:border-red-400 hover:text-red-600 dark:border-neutral-700"
-          : "bg-accent text-white hover:bg-accent-deep"
+          ? "border border-line text-ink-secondary hover:text-ink"
+          : "bg-accent text-white hover:bg-accent-hover"
       }`}
     >
       {following ? "Following" : "Follow"}

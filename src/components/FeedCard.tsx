@@ -1,72 +1,87 @@
 "use client";
 
 import Link from "next/link";
+import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
 import { LikeButton } from "@/components/LikeButton";
 import { ExpandableText } from "@/components/ExpandableText";
+import { Stars } from "@/components/icons";
+import { timeAgo } from "@/lib/time";
 import type { FeedItemDto } from "@/lib/feed-types";
 
-// Client component because feed pages beyond the first arrive via fetch —
-// the whole list lives client-side after hydration.
+// One feed item. Not a card: hairline rules and space do the separation
+// (the list supplies both). One quiet meta line, then the book, then the
+// words. Client component because pages 2+ arrive via fetch.
 export function FeedCard({ item }: { item: FeedItemDto }) {
-  const date = new Date(item.at).toLocaleDateString();
-
   return (
-    <article className="flex gap-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
-      <Link href={`/books/${item.bookId}`} className="shrink-0">
-        <BookCover coverId={item.coverId} title={item.bookTitle} size="S" />
-      </Link>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-sm">
-          <Link href={`/users/${item.username}`} className="font-medium hover:underline">
-            @{item.username}
+    <article className="py-7">
+      <div className="flex items-center gap-2.5 text-[13px] text-ink-secondary">
+        <Link
+          href={`/users/${item.username}`}
+          aria-label={`${item.username}'s profile`}
+          className="shrink-0 rounded-full"
+        >
+          <Avatar username={item.username} avatarUrl={item.avatarUrl} size="sm" />
+        </Link>
+        <p className="min-w-0 truncate">
+          <Link
+            href={`/users/${item.username}`}
+            className="font-medium text-ink hover:text-accent"
+          >
+            {item.username}
           </Link>{" "}
-          {item.kind === "review" ? (
-            <>reviewed{" "}
-              <Link href={`/books/${item.bookId}`} className="font-medium hover:underline">
-                {item.bookTitle}
-              </Link>
-            </>
-          ) : (
-            <>
-              shelved{" "}
-              <Link href={`/books/${item.bookId}`} className="font-medium hover:underline">
-                {item.bookTitle}
-              </Link>{" "}
-              as <em>{item.shelfName}</em>
-            </>
-          )}
-          <span className="ml-2 text-neutral-400">{date}</span>
+          {item.kind === "review" ? "reviewed" : `shelved as ${item.shelfName}`}
+          <span aria-hidden> · </span>
+          <time dateTime={item.at}>{timeAgo(item.at)}</time>
         </p>
-
-        {item.kind === "review" && (
-          <div className="mt-1 flex flex-col gap-2">
-            {item.rating !== null && (
-              <span className="text-sm text-amber-500">
-                {"★".repeat(item.rating)}
-                <span className="text-neutral-300 dark:text-neutral-600">
-                  {"★".repeat(5 - item.rating)}
-                </span>
-              </span>
-            )}
-            {item.body && <ExpandableText text={item.body} />}
-            <div className="flex items-center gap-4">
-              <LikeButton
-                reviewId={item.reviewId!}
-                initialCount={item.likeCount}
-                initialLiked={item.likedByMe}
-              />
-              <Link
-                href={`/books/${item.bookId}`}
-                className="text-sm text-neutral-500 hover:underline"
-              >
-                💬 {item.commentCount}
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
+
+      <div className="mt-4 flex gap-5">
+        <Link href={`/books/${item.bookId}`} className="shrink-0 self-start">
+          <BookCover coverId={item.coverId} title={item.bookTitle} size="feed" />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-[21px] font-semibold leading-tight">
+            <Link href={`/books/${item.bookId}`} className="hover:text-accent">
+              {item.bookTitle}
+            </Link>
+          </h2>
+          {item.bookAuthors && (
+            <p className="mt-0.5 text-[15px] text-ink-secondary">
+              {item.bookAuthors}
+            </p>
+          )}
+          {item.kind === "review" && item.rating !== null && (
+            <div className="mt-2">
+              <Stars value={item.rating} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {item.kind === "review" && item.body && (
+        <div className="mt-4">
+          <ExpandableText text={item.body} />
+        </div>
+      )}
+
+      {item.kind === "review" && item.reviewId && (
+        <div className="mt-4 flex items-center gap-6 text-[15px]">
+          <LikeButton
+            reviewId={item.reviewId}
+            initialCount={item.likeCount}
+            initialLiked={item.likedByMe}
+          />
+          <Link
+            href={`/books/${item.bookId}`}
+            className="tnum text-ink-secondary transition-colors duration-150 hover:text-accent"
+          >
+            {item.commentCount === 0
+              ? "Comment"
+              : `Comments ${item.commentCount}`}
+          </Link>
+        </div>
+      )}
     </article>
   );
 }

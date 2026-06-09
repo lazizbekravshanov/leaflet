@@ -29,6 +29,7 @@ export type FeedRow = {
   avatar_url: string | null;
   book_id: string;
   book_title: string;
+  book_authors: string | null;
   cover_id: number | null;
   review_id: string | null;
   body: string | null;
@@ -90,6 +91,10 @@ export const feedRepository = {
              u.avatar_url,
              b.id    AS book_id,
              b.title AS book_title,
+             (SELECT string_agg(a2.name, ', ' ORDER BY ba.position)
+                FROM book_authors ba
+                JOIN authors a2 ON a2.id = ba.author_id
+               WHERE ba.book_id = b.id)                         AS book_authors,
              b.cover_id,
              a.review_id,
              a.body,

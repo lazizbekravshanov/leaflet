@@ -35,6 +35,7 @@ function toDto(row: FeedRow): FeedItemDto {
     avatarUrl: row.avatar_url,
     bookId: row.book_id,
     bookTitle: row.book_title,
+    bookAuthors: row.book_authors,
     coverId: row.cover_id,
     reviewId: row.review_id,
     body: row.body,

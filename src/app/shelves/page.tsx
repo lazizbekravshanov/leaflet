@@ -6,49 +6,61 @@ import { BookCover } from "@/components/BookCover";
 
 export default async function ShelvesPage() {
   const user = await getCurrentUser();
-  // Page-level auth: redirect instead of 401 — this is a page, not an API.
   if (!user) redirect("/login");
 
   const shelves = await shelfService.listForUser(user.id);
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold">My Shelves</h1>
-      {shelves.map((shelf) => (
-        <section key={shelf.id}>
-          <h2 className="mb-3 text-lg font-medium">
-            {shelf.name}{" "}
-            <span className="text-sm font-normal text-neutral-500">
-              ({shelf.items.length})
-            </span>
-          </h2>
-          {shelf.items.length === 0 ? (
-            <p className="text-sm text-neutral-500">
-              Nothing here yet —{" "}
-              <Link href="/books" className="text-accent underline">
-                find a book
-              </Link>
-              .
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-4">
-              {shelf.items.map((item) => (
+    <div className="mx-auto max-w-[1080px] px-5 py-12">
+      <h1 className="font-display text-[28px] font-semibold">My shelves</h1>
+      <div className="mt-8 flex flex-col gap-12">
+        {shelves.map((shelf) => (
+          <section key={shelf.id}>
+            <h2 className="border-b border-line pb-3 text-[15px] font-medium">
+              {shelf.name}{" "}
+              <span className="tnum font-normal text-ink-secondary">
+                {shelf.items.length}
+              </span>
+            </h2>
+            {shelf.items.length === 0 ? (
+              <p className="mt-4 text-[15px] text-ink-secondary">
+                Nothing here yet —{" "}
                 <Link
-                  key={item.bookId}
-                  href={`/books/${item.bookId}`}
-                  title={item.book.title}
+                  href="/books"
+                  className="text-ink underline underline-offset-2 hover:text-accent"
                 >
-                  <BookCover
-                    coverId={item.book.coverId}
-                    title={item.book.title}
-                    size="M"
-                  />
+                  find a book
                 </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      ))}
+                .
+              </p>
+            ) : (
+              <div className="mt-5 grid grid-cols-3 gap-x-5 gap-y-8 sm:grid-cols-4 md:grid-cols-6">
+                {shelf.items.map((item) => (
+                  <Link
+                    key={item.bookId}
+                    href={`/books/${item.bookId}`}
+                    className="group"
+                  >
+                    <div className="transition-transform duration-200 ease-(--ease) group-hover:scale-[1.02]">
+                      <BookCover
+                        coverId={item.book.coverId}
+                        title={item.book.title}
+                        size="full"
+                      />
+                    </div>
+                    <p className="mt-2 truncate text-[13px] font-medium">
+                      {item.book.title}
+                    </p>
+                    <p className="truncate text-[13px] text-ink-secondary">
+                      {item.book.authors.map((a) => a.author.name).join(", ")}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

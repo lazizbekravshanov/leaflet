@@ -7,15 +7,21 @@
 
 export function FeedSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col gap-3">
-      {Array.from({ length: 4 }, (_, i) => (
-        <div key={i} className="flex gap-4 rounded-lg border border-ink/10 p-4">
-          <div className="h-[4.5rem] w-12 rounded bg-ink/10" />
-          <div className="flex flex-1 flex-col gap-2">
-            <div className="h-4 w-2/3 rounded bg-ink/10" />
-            <div className="h-3 w-1/4 rounded bg-ink/10" />
-            <div className="h-3 w-full rounded bg-ink/10" />
-            <div className="h-3 w-5/6 rounded bg-ink/10" />
+    <div className="divide-y divide-line" aria-hidden>
+      {Array.from({ length: 3 }, (_, i) => (
+        <div key={i} className="animate-pulse py-7">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-full bg-bg-subtle" />
+            <div className="h-3 w-44 rounded-control bg-bg-subtle" />
+          </div>
+          <div className="mt-4 flex gap-5">
+            <div className="aspect-2/3 w-16 rounded-card bg-bg-subtle" />
+            <div className="flex flex-1 flex-col gap-2 py-1">
+              <div className="h-5 w-1/2 rounded-control bg-bg-subtle" />
+              <div className="h-3.5 w-1/3 rounded-control bg-bg-subtle" />
+              <div className="mt-2 h-3.5 w-full rounded-control bg-bg-subtle" />
+              <div className="h-3.5 w-5/6 rounded-control bg-bg-subtle" />
+            </div>
           </div>
         </div>
       ))}
@@ -25,14 +31,13 @@ export function FeedSkeleton() {
 
 export function SearchResultsSkeleton() {
   return (
-    <div className="grid animate-pulse gap-3 sm:grid-cols-2">
+    <div className="grid animate-pulse gap-x-8 gap-y-6 sm:grid-cols-2" aria-hidden>
       {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="flex gap-4 rounded-lg border border-ink/10 p-4">
-          <div className="h-[4.5rem] w-12 rounded bg-ink/10" />
+        <div key={i} className="flex gap-4 border-t border-line pt-5">
+          <div className="aspect-2/3 w-12 rounded-card bg-bg-subtle" />
           <div className="flex flex-1 flex-col gap-2 py-1">
-            <div className="h-4 w-3/4 rounded bg-ink/10" />
-            <div className="h-3 w-1/2 rounded bg-ink/10" />
-            <div className="h-3 w-1/3 rounded bg-ink/10" />
+            <div className="h-4 w-3/4 rounded-control bg-bg-subtle" />
+            <div className="h-3 w-1/2 rounded-control bg-bg-subtle" />
           </div>
         </div>
       ))}
