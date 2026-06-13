@@ -86,6 +86,10 @@ model User {
   // Follow edge. "following" = Follow rows where I am the follower.
   following Follow[]  @relation("follower")
   followers Follow[]  @relation("followee")
+  // Precomputed "who to follow" (Phase 6): rows computed FOR me, and rows that
+  // recommend me TO others.
+  recommendationsFor Recommendation[] @relation("recOwner")
+  recommendedTo      Recommendation[] @relation("recTarget")
 
   @@map("users")
 }
@@ -376,6 +380,34 @@ model Follow {
   @@index([followeeId])
   // "You can't follow yourself" is a CHECK constraint in the migration.
   @@map("follows")
+}
+
+// ── Recommendations ───────────────────────────────────────────────────────
+
+// Precomputed "who to follow" (Phase 6). The recommender is an OFFLINE batch —
+// the 2-hop graph traversal + Jaccard taste overlap is too heavy to run on
+// every page view — so it's computed per user and stored here; reads are a
+// cheap indexed lookup. This is the precompute pattern under every real
+// recommender (the online query just reads precomputed rows).
+model Recommendation {
+  userId            String   @map("user_id")             // who it's for
+  recommendedUserId String   @map("recommended_user_id") // who to follow
+  score             Float    @map("score")
+  // Dominant signal: "mutuals" (friends-of-friends) or "taste" (shelf overlap).
+  reason            String   @map("reason")
+  mutuals           Int      @default(0) @map("mutuals") // for "followed by N you follow"
+  computedAt        DateTime @default(now()) @map("computed_at")
+
+  user        User @relation("recOwner", fields: [userId], references: [id], onDelete: Cascade)
+  recommended User @relation("recTarget", fields: [recommendedUserId], references: [id], onDelete: Cascade)
+
+  // One row per (owner, candidate); the PK is the natural key.
+  @@id([userId, recommendedUserId])
+  // The hot read: my recommendations, best first.
+  @@index([userId, score(sort: Desc)])
+  // Reverse lookup for cascade/refresh when a recommended user changes.
+  @@index([recommendedUserId])
+  @@map("recommendations")
 }
 
 // ── Rate limiting ─────────────────────────────────────────────────────────

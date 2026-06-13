@@ -441,3 +441,36 @@ gates the controls.
 **Question:** `OFFSET 10000 LIMIT 20` gets slower the deeper you page; the feed's
 `WHERE (created_at, id) < (?, ?) LIMIT 20` doesn't. Why — and why is OFFSET still
 the right choice for these two lists despite that?
+
+## 16. Follow recommendations — Phase 6 (friends-of-friends + taste, precomputed)
+
+"Who to follow," from two signals over a precomputed table.
+
+**Concepts**
+- Graph traversal in SQL. Friends-of-friends is a 2-HOP walk of the `follows`
+  edge list — a self-join `follows f1 JOIN follows f2 ON f2.follower = f1.followee`
+  finds people followed by people I follow, grouped and weighted by the mutual
+  count. The 2-hop fan-out is `O(following × their_following)`; on a dense graph
+  it explodes, which is the whole reason it's precomputed, not run per request
+  (a `LIMIT`-per-hop would tame the online version, precomputation tames the
+  offline one).
+- Set similarity. Taste overlap is JACCARD — `|A∩B| / |A∪B|` over the books on
+  each user's READ shelf. Computed only for candidates who share ≥1 read book
+  (the `shared_read` CTE), so it never scans the whole user base, and the union
+  size is `|mine| + |theirs| − |overlap|`.
+- Offline vs online. The heavy query writes top-20 per user into
+  `recommendations`; the page read is one indexed lookup of those rows. With no
+  cron, the "batch" runs LAZILY on read when the set is missing or >6h old — the
+  same online/offline split, scheduled by a visit. The read also live-filters
+  anyone you've followed since, so a stale set never recommends a current follow.
+- Combine + explain. Score = `mutuals·1 + jaccard·10` (a real taste match is
+  rarer than one shared follow); `reason` records the dominant signal so the UI
+  can say "Followed by N readers you follow" vs "Similar taste in books."
+
+**Verified** (demo graph): amelia (follows ben/chloe/elena/grace) → felix
+(mutuals 2 — ben & chloe both follow him), hugo, dmitri (1 each); zero self- or
+already-followed rows; the precompute fired lazily on first `/people` visit.
+
+**Question:** Why does the 2-hop query explode on a dense graph, and how do
+LIMIT-per-hop (online) and precomputation (offline) each tame it — what does each
+give up?

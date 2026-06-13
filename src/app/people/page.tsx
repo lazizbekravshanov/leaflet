@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { userService } from "@/services/user.service";
@@ -6,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { Pager } from "@/components/Pager";
+import { WhoToFollow } from "@/components/WhoToFollow";
 
 export default async function PeoplePage({
   searchParams,
@@ -28,6 +30,13 @@ export default async function PeoplePage({
       <p className="mt-1 text-[15px] text-ink-secondary">
         Follow readers to fill your feed.
       </p>
+      {page === 0 && (
+        <div className="mt-8">
+          <Suspense fallback={null}>
+            <WhoToFollow userId={viewer.id} />
+          </Suspense>
+        </div>
+      )}
       <div className="mt-8 divide-y divide-line">
         {people
           .filter((p) => p.id !== viewer.id)
