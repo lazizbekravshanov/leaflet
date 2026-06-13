@@ -363,3 +363,22 @@ model Follow {
   // "You can't follow yourself" is a CHECK constraint in the migration.
   @@map("follows")
 }
+
+// ── Rate limiting ─────────────────────────────────────────────────────────
+
+// Append-only log of auth attempts, one row per attempt. The limiter counts
+// rows for a bucket within a trailing window (a Postgres SLIDING window — the
+// same shape Redis models with a sorted set: ZADD timestamp, then ZCOUNT over
+// a score range). Autoincrement id, NOT cuid: this is an internal, ephemeral,
+// pruned log — not a user-facing entity, so none of the cuid reasons apply.
+model RateLimitHit {
+  id        Int      @id @default(autoincrement())
+  // e.g. "login:ip:1.2.3.4" or "login:email:a@b.com". Opaque to the table.
+  bucket    String   @map("bucket")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Serves both the window count (bucket + created_at range) and pruning
+  // (created_at range) in one composite B-tree.
+  @@index([bucket, createdAt])
+  @@map("rate_limit_hits")
+}

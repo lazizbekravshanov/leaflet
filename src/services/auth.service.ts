@@ -31,6 +31,10 @@ async function createSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await sessionRepository.create({ tokenHash: hashToken(token), userId, expiresAt });
+  // Reap this user's expired sessions now that they've started a fresh one, so
+  // an active account never grows a pile of dead rows (the table-growth gap
+  // flagged in review). One indexed delete; no cron required.
+  await sessionRepository.deleteExpiredForUser(userId);
   // The raw token leaves the server exactly once, inside the Set-Cookie
   // header. We never store or log it.
   return { token, expiresAt };
@@ -42,8 +46,12 @@ export const authService = {
     const username = requireUsername(input.username);
     // Length is the only password rule worth having (NIST SP 800-63B):
     // composition rules ("1 uppercase, 1 symbol") push users toward
-    // predictable patterns. The 72-byte cap is bcrypt's input limit.
-    const password = requireString(input.password, "password", { min: 8, max: 72 });
+    // predictable patterns. The cap is bcrypt's real input limit — 72 BYTES,
+    // not chars (a multibyte password could otherwise be silently truncated).
+    const password = requireString(input.password, "password", {
+      min: 8,
+      maxBytes: 72,
+    });
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
@@ -66,7 +74,10 @@ export const authService = {
 
   async login(input: { email: unknown; password: unknown }) {
     const email = requireEmail(input.email);
-    const password = requireString(input.password, "password", { min: 1, max: 72 });
+    const password = requireString(input.password, "password", {
+      min: 1,
+      maxBytes: 72,
+    });
 
     const user = await userRepository.findByEmail(email);
 

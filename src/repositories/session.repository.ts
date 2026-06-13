@@ -24,4 +24,15 @@ export const sessionRepository = {
   deleteAllForUser(userId: string) {
     return prisma.session.deleteMany({ where: { userId } });
   },
+
+  // Reap this user's expired rows. Called opportunistically on login (right
+  // after rotation), so an active account never accumulates dead sessions.
+  // Scoped to one user and served by @@index([userId]) — cheap, no global
+  // sweep / cron needed. (Truly abandoned accounts' rows linger harmlessly;
+  // findValidWithUser already filters on expires_at, so they're never valid.)
+  deleteExpiredForUser(userId: string) {
+    return prisma.session.deleteMany({
+      where: { userId, expiresAt: { lt: new Date() } },
+    });
+  },
 };

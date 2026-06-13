@@ -6,7 +6,7 @@ import { ValidationError } from "@/lib/errors";
 export function requireString(
   value: unknown,
   field: string,
-  opts: { min?: number; max?: number } = {},
+  opts: { min?: number; max?: number; maxBytes?: number } = {},
 ): string {
   if (typeof value !== "string") {
     throw new ValidationError(`${field} is required`);
@@ -17,6 +17,15 @@ export function requireString(
   }
   if (opts.max !== undefined && trimmed.length > opts.max) {
     throw new ValidationError(`${field} must be at most ${opts.max} characters`);
+  }
+  // Byte (not char) limit — bcrypt truncates input at 72 BYTES, and a password
+  // of multibyte characters can pass a char check yet be silently cut. Enforce
+  // the real limit so what the user typed is what gets hashed.
+  if (
+    opts.maxBytes !== undefined &&
+    Buffer.byteLength(trimmed, "utf8") > opts.maxBytes
+  ) {
+    throw new ValidationError(`${field} must be at most ${opts.maxBytes} bytes`);
   }
   return trimmed;
 }

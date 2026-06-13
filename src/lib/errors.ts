@@ -41,3 +41,9 @@ export class ConflictError extends AppError {
     super(message, 409);
   }
 }
+
+export class RateLimitError extends AppError {
+  constructor(message = "Too many attempts. Try again later.") {
+    super(message, 429);
+  }
+}

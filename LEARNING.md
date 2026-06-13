@@ -370,3 +370,43 @@ indexes themselves are preserved; only the generated-ness confuses the differ.
 and trigram the reverse? (And: the `search_vector` is a STORED generated column —
 what would break if author names were part of it directly instead of via
 `authors_text`, and why does the generated column force that denormalization?)
+
+## 14. Auth hardening — rate limiting, session reaping, cookie, password bytes
+
+The security gaps flagged in the very first review, closed. The headline is the
+**bcrypt DoS**: login spends ~250ms of CPU in `bcrypt.compare` by design (that
+slowness is what protects a stolen hash), and the user-enumeration defense makes
+even unknown emails pay it — so an unthrottled login endpoint is a CPU-exhaustion
+amplifier. The fix is a rate limiter IN FRONT of the hash.
+
+**Concepts**
+- Sliding window, not fixed window. `lib/rate-limit.ts` logs one row per attempt
+  and counts rows in a trailing N-second interval. A fixed calendar window lets
+  an attacker fire 2x the limit across the boundary (tail of one window + head
+  of the next); the trailing count closes that. This is the Postgres form of the
+  Redis sorted-set limiter (ZADD now / ZCOUNT the score range / ZREMRANGEBYSCORE
+  to prune) — same algorithm, one indexed table instead of a Redis key.
+- Limit before the expensive work. The check runs in the route handler before
+  `authService.login`, so a rejected request never reaches bcrypt. Two buckets:
+  per-IP (10/10min, flood control) and per-email (5/10min, targeted brute force)
+  — the stricter email bucket trips first when one account is hammered.
+- Layer placement. The limiter reads the client IP (`x-forwarded-for`), an HTTP
+  concern, so it lives in `lib/` and is called from the route — the service
+  stays HTTP-agnostic and bcrypt-only, exactly as before.
+- Bounded log. Each check opportunistically prunes its bucket's rows older than
+  the window, so the table self-trims without a cron.
+- Session reaping. `createSession` deletes the user's expired rows right after
+  rotation (indexed by user_id), so an active account never piles up dead
+  sessions — the unbounded-growth gap, fixed without a sweep job.
+- Cookie + password fixes. `Secure` now gates on `!== "development"` (preview/
+  self-host builds stay https-only, not just prod); the password cap is 72
+  BYTES not chars, since bcrypt truncates on bytes and a multibyte password
+  could otherwise be silently cut before hashing.
+
+**Verified** (bench, live HTTP): 12 rapid wrong-password logins on one email →
+401 ×5 then 429 (email bucket trips at the 6th); a 74-byte multibyte password →
+400 "must be at most 72 bytes".
+
+**Question:** Two requests hit the limiter at the same instant when the bucket is
+one under its limit — can both slip through, and does that matter for a DoS
+control versus for, say, a "one vote per user" rule?

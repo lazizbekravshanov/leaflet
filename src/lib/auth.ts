@@ -12,9 +12,11 @@ export async function setSessionCookie(token: string, expiresAt: Date) {
     // httpOnly: document.cookie cannot read it, so an XSS bug can abuse the
     // session only while the tab is open — it cannot exfiltrate the token.
     httpOnly: true,
-    // secure: never sent over plain http. Conditional only so that
-    // localhost dev (http) works; production is always https.
-    secure: process.env.NODE_ENV === "production",
+    // secure: never sent over plain http. Default on; only explicit
+    // development (localhost http) opts out. Gating on !== "development"
+    // rather than === "production" means preview/staging/self-host builds
+    // stay secure instead of silently shipping the cookie in the clear.
+    secure: process.env.NODE_ENV !== "development",
     // lax: the CSRF layer 1 (see lib/csrf.ts for layer 2). Cross-site
     // POSTs don't carry the cookie; top-level link navigation still does,
     // so following a leaflet link from elsewhere keeps you signed in.
