@@ -57,7 +57,7 @@ export function NavShell({
               name="q"
               placeholder="Search books or authors"
               aria-label="Search books or authors"
-              className="w-full max-w-[280px] rounded-control bg-bg-subtle px-3 py-1.5 text-[15px] placeholder:text-ink-tertiary focus:outline-2 focus:outline-accent"
+              className="w-full max-w-[280px] rounded-control border border-line bg-bg-subtle px-3 py-1.5 text-[15px] transition-colors duration-150 placeholder:text-ink-tertiary hover:border-line-strong focus:border-accent focus:bg-bg focus:outline-none"
             />
           </form>
         )}
@@ -65,13 +65,13 @@ export function NavShell({
         <div className="ml-auto flex shrink-0 items-center gap-5 text-[15px]">
           {user ? (
             <>
-              <Link href="/books" className="hidden hover:text-accent sm:block">
+              <Link href="/books" className="nav-link hidden sm:block">
                 Browse
               </Link>
-              <Link href="/shelves" className="hidden hover:text-accent sm:block">
+              <Link href="/shelves" className="nav-link hidden sm:block">
                 Shelves
               </Link>
-              <Link href="/people" className="hover:text-accent">
+              <Link href="/people" className="nav-link">
                 People
               </Link>
               <div className="relative" ref={menuRef}>
@@ -93,7 +93,7 @@ export function NavShell({
                       role="menuitem"
                       href={`/users/${user.username}`}
                       onClick={() => setMenuOpen(false)}
-                      className="px-4 py-2 text-[15px] hover:bg-bg-subtle"
+                      className="px-4 py-2 text-[15px] transition-colors duration-150 hover:bg-bg-subtle"
                     >
                       Profile
                     </Link>
@@ -101,7 +101,7 @@ export function NavShell({
                       role="menuitem"
                       href="/settings"
                       onClick={() => setMenuOpen(false)}
-                      className="px-4 py-2 text-[15px] hover:bg-bg-subtle"
+                      className="px-4 py-2 text-[15px] transition-colors duration-150 hover:bg-bg-subtle"
                     >
                       Settings
                     </Link>
@@ -113,13 +113,10 @@ export function NavShell({
             </>
           ) : (
             <>
-              <Link href="/login" className="hover:text-accent">
+              <Link href="/login" className="nav-link">
                 Log in
               </Link>
-              <Link
-                href="/signup"
-                className="rounded-control bg-accent px-3.5 py-1.5 text-white transition-colors duration-150 hover:bg-accent-hover"
-              >
+              <Link href="/signup" className="btn btn-primary btn-sm">
                 Sign up
               </Link>
             </>

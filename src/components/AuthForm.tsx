@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const FIELD =
-  "w-full rounded-control bg-bg-subtle px-3.5 py-2.5 text-[15px] placeholder:text-ink-tertiary";
+const FIELD = "field";
 
 // One form for signup and login — they differ by the username field and the
 // endpoint. Errors are plain sentences in ink, inline under the form.
@@ -89,11 +88,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
           {error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={busy}
-        className="mt-2 w-full rounded-control bg-accent py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover disabled:opacity-50"
-      >
+      <button type="submit" disabled={busy} className="btn btn-primary mt-2 w-full">
         {mode === "signup" ? "Create your shelf" : "Log in"}
       </button>
     </form>

@@ -31,11 +31,7 @@ export function FollowButton({
   return (
     <button
       onClick={toggle}
-      className={`rounded-control px-4 py-1.5 text-[15px] font-medium transition-colors duration-150 ${
-        following
-          ? "border border-line text-ink-secondary hover:text-ink"
-          : "bg-accent text-white hover:bg-accent-hover"
-      }`}
+      className={`btn ${following ? "btn-outline" : "btn-primary"}`}
     >
       {following ? "Following" : "Follow"}
     </button>

@@ -83,10 +83,7 @@ async function FeedSection({
         <p className="max-w-[36ch] text-[15px] text-ink-secondary">
           Follow a few readers and their reviews and shelves will appear here.
         </p>
-        <Link
-          href="/people"
-          className="rounded-control bg-accent px-4 py-2 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover"
-        >
+        <Link href="/people" className="btn btn-primary">
           Find readers
         </Link>
       </div>

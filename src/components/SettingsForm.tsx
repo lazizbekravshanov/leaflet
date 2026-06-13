@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// One 560px column. Labels above inputs, inputs on bg-subtle with no border
-// until focus (the global accent focus ring). Hairline dividers group the
-// fields. Validation messages are plain sentences in ink — no red, no toasts.
-const FIELD =
-  "w-full rounded-control bg-bg-subtle px-3.5 py-2.5 text-[15px] placeholder:text-ink-tertiary";
+// One 560px column. Labels above inputs; shared .field primitive (hairline at
+// rest, accent border on focus). Hairline dividers group the fields.
+// Validation messages are plain sentences in ink — no red, no toasts.
+const FIELD = "field";
 
 export function SettingsForm({
   initial,
@@ -95,11 +94,7 @@ export function SettingsForm({
       </div>
 
       <div className="flex items-center gap-4 border-t border-line pt-7">
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-control bg-accent px-5 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy} className="btn btn-primary">
           Save changes
         </button>
         {message && (

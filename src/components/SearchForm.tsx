@@ -10,12 +10,9 @@ export function SearchForm({ defaultValue = "" }: { defaultValue?: string }) {
         defaultValue={defaultValue}
         placeholder="Search books or authors"
         aria-label="Search books or authors"
-        className="flex-1 rounded-control bg-bg-subtle px-3.5 py-2.5 text-[15px] placeholder:text-ink-tertiary"
+        className="field flex-1"
       />
-      <button
-        type="submit"
-        className="rounded-control bg-accent px-4 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover"
-      >
+      <button type="submit" className="btn btn-primary">
         Search
       </button>
     </form>
