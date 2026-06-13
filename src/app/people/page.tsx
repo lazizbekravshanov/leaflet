@@ -5,13 +5,19 @@ import { userService } from "@/services/user.service";
 import { prisma } from "@/lib/db";
 import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
+import { Pager } from "@/components/Pager";
 
-export default async function PeoplePage() {
+export default async function PeoplePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
 
-  const [people, myFollows] = await Promise.all([
-    userService.listPeople(),
+  const page = Math.max(0, parseInt((await searchParams).page ?? "0", 10) || 0);
+  const [{ items: people, hasMore }, myFollows] = await Promise.all([
+    userService.listPeople(page),
     prisma.follow.findMany({ where: { followerId: viewer.id } }),
   ]);
   const followingIds = new Set(myFollows.map((f) => f.followeeId));
@@ -64,6 +70,11 @@ export default async function PeoplePage() {
             </div>
           ))}
       </div>
+      <Pager
+        page={page}
+        hasMore={hasMore}
+        hrefFor={(p) => (p === 0 ? "/people" : `/people?page=${p}`)}
+      />
     </div>
   );
 }

@@ -410,3 +410,34 @@ amplifier. The fix is a rate limiter IN FRONT of the hash.
 **Question:** Two requests hit the limiter at the same instant when the bucket is
 one under its limit — can both slip through, and does that matter for a DoS
 control versus for, say, a "one vote per user" rule?
+
+## 15. Pagination & list hardening — Phase 1 (profile reviews, people directory)
+
+Two lists that used to load EVERYTHING — every review a user ever wrote, every
+user in the directory — are now paginated. Deliberately with **OFFSET**, not the
+feed's keyset, and the point of the phase is knowing when that's the right call.
+
+**Concepts**
+- OFFSET vs keyset, and when offset is fine. `OFFSET n LIMIT k` makes Postgres
+  read and discard the first n rows — cost grows with depth, which is why the
+  hot, unbounded FEED uses keyset (`WHERE (at, id) < cursor`) instead. But a
+  profile's reviews and a member directory are SHALLOW and bounded, and users
+  browse them by page number; at these depths the discarded-rows cost is
+  irrelevant and a `?page=N` UI is what people expect. Matching the tool to the
+  access pattern beats using the fanciest one everywhere.
+- `limit + 1` for "has next", no count query. Fetching one extra row tells you a
+  next page exists without a separate `COUNT(*)` over the whole list — the same
+  trick the feed uses, reused for the offset pager.
+- URL-driven, server-rendered. `?page=N` lives in the URL, so pages are
+  linkable and the back button works; the `Pager` is a server component with no
+  client state.
+
+**Done:** `userRepository.listPage` / `listReviewsByUser` take limit+offset and
+return `{ items, hasMore }`; the people and profile pages read `?page`, and a
+shared `<Pager>` renders prev/next only when those directions exist. Verified at
+volume (2,008 users, a 15-review profile) — pages are correct and `hasMore`
+gates the controls.
+
+**Question:** `OFFSET 10000 LIMIT 20` gets slower the deeper you page; the feed's
+`WHERE (created_at, id) < (?, ?) LIMIT 20` doesn't. Why — and why is OFFSET still
+the right choice for these two lists despite that?

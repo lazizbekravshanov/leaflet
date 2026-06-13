@@ -32,8 +32,14 @@ export const userRepository = {
   // The people directory: every user plus relationship counts, now both
   // denormalized columns (follower_count from Phase 2, review_count from
   // Phase 5) — two scalar reads, no COUNT(*) subqueries at all.
-  listAll() {
-    return prisma.user.findMany({
+  //
+  // OFFSET pagination (Phase 1), not keyset — deliberately. This is a small,
+  // bounded, browseable directory (not a deep hot feed): OFFSET's "read and
+  // discard N rows" cost is irrelevant at these depths, and a page-number UI is
+  // what users expect for a directory. Keyset is the feed's tool, for unbounded
+  // depth where discarding rows would dominate. limit+1 detects a next page.
+  async listPage(limit: number, offset: number) {
+    const rows = await prisma.user.findMany({
       select: {
         id: true,
         username: true,
@@ -43,15 +49,24 @@ export const userRepository = {
         reviewCount: true,
       },
       orderBy: { createdAt: "asc" },
+      take: limit + 1,
+      skip: offset,
     });
+    return { items: rows.slice(0, limit), hasMore: rows.length > limit };
   },
 
-  listReviewsByUser(userId: string) {
-    return prisma.review.findMany({
+  // Profile reviews, paginated (Phase 1) — was an unbounded load. Same OFFSET
+  // approach and rationale as the directory: a profile is shallow and browsed
+  // by page, not infinite-scrolled.
+  async listReviewsByUser(userId: string, limit: number, offset: number) {
+    const rows = await prisma.review.findMany({
       where: { userId },
       include: { book: true },
       orderBy: { createdAt: "desc" },
+      take: limit + 1,
+      skip: offset,
     });
+    return { items: rows.slice(0, limit), hasMore: rows.length > limit };
   },
 
   // Creating the user and their three system shelves in one nested create

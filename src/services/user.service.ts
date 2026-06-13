@@ -5,18 +5,23 @@ import { followRepository } from "@/repositories/follow.repository";
 import { shelfRepository } from "@/repositories/shelf.repository";
 import { prisma } from "@/lib/db";
 
+const PROFILE_REVIEWS_PER_PAGE = 10;
+const PEOPLE_PER_PAGE = 24;
+
 export const userService = {
   // Everything the profile page needs. The queries are independent, so they
-  // run concurrently (same pattern as the book page).
-  async getProfile(username: string, viewerId: string | null) {
+  // run concurrently (same pattern as the book page). Reviews are paginated
+  // (Phase 1) — they used to load every review a user ever wrote.
+  async getProfile(username: string, viewerId: string | null, reviewsPage = 0) {
     const user = await userRepository.findByUsername(username);
     if (!user) throw new NotFoundError("User not found");
+    const offset = reviewsPage * PROFILE_REVIEWS_PER_PAGE;
 
-    const [counts, isFollowing, shelves, reviews, ratings] = await Promise.all([
+    const [counts, isFollowing, shelves, reviewPage, ratings] = await Promise.all([
       followRepository.counts(user.id),
       viewerId ? followRepository.isFollowing(viewerId, user.id) : false,
       shelfRepository.listForUser(user.id),
-      userRepository.listReviewsByUser(user.id),
+      userRepository.listReviewsByUser(user.id, PROFILE_REVIEWS_PER_PAGE, offset),
       prisma.rating.findMany({ where: { userId: user.id } }),
     ]);
 
@@ -32,15 +37,17 @@ export const userService = {
       counts,
       isFollowing,
       shelves,
-      reviews: reviews.map((r) => ({
+      reviews: reviewPage.items.map((r) => ({
         ...r,
         rating: ratingByBook.get(r.bookId) ?? null,
       })),
+      reviewsPage,
+      reviewsHasMore: reviewPage.hasMore,
     };
   },
 
-  listPeople() {
-    return userRepository.listAll();
+  listPeople(page = 0) {
+    return userRepository.listPage(PEOPLE_PER_PAGE, page * PEOPLE_PER_PAGE);
   },
 
   // Settings form. Empty strings normalize to NULL — "cleared" and "never

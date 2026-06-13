@@ -7,27 +7,36 @@ import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { BookCover } from "@/components/BookCover";
 import { ProfileTabs } from "@/components/ProfileTabs";
+import { Pager } from "@/components/Pager";
 import { Stars } from "@/components/icons";
 import { timeAgo } from "@/lib/time";
 
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const [{ username }, viewer] = await Promise.all([params, getCurrentUser()]);
+  const [{ username }, { page: rawPage }, viewer] = await Promise.all([
+    params,
+    searchParams,
+    getCurrentUser(),
+  ]);
+  const page = Math.max(0, parseInt(rawPage ?? "0", 10) || 0);
 
   let profile;
   try {
     profile = await userService.getProfile(
       decodeURIComponent(username),
       viewer?.id ?? null,
+      page,
     );
   } catch (e) {
     if (e instanceof NotFoundError) notFound();
     throw e;
   }
-  const { user, counts, isFollowing, shelves, reviews } = profile;
+  const { user, counts, isFollowing, shelves, reviews, reviewsHasMore } = profile;
   const isMe = viewer?.id === user.id;
   const allShelved = shelves.flatMap((s) =>
     s.items.map((item) => ({ shelf: s.name, ...item })),
@@ -67,7 +76,13 @@ export default async function ProfilePage({
         <ProfileTabs
           labels={["Reviews", "Shelves"]}
           panels={[
-            <ReviewsPanel key="r" reviews={reviews} />,
+            <ReviewsPanel
+              key="r"
+              reviews={reviews}
+              username={user.username}
+              page={page}
+              hasMore={reviewsHasMore}
+            />,
             <ShelvesPanel key="s" items={allShelved} />,
           ]}
         />
@@ -78,6 +93,9 @@ export default async function ProfilePage({
 
 function ReviewsPanel({
   reviews,
+  username,
+  page,
+  hasMore,
 }: {
   reviews: Array<{
     id: string;
@@ -87,13 +105,21 @@ function ReviewsPanel({
     rating: number | null;
     book: { title: string };
   }>;
+  username: string;
+  page: number;
+  hasMore: boolean;
 }) {
   if (reviews.length === 0) {
-    return <p className="text-[15px] text-ink-secondary">No reviews yet.</p>;
+    return (
+      <p className="text-[15px] text-ink-secondary">
+        {page === 0 ? "No reviews yet." : "No more reviews."}
+      </p>
+    );
   }
   return (
-    <div className="mx-auto max-w-[640px] divide-y divide-line">
-      {reviews.map((review) => (
+    <div className="mx-auto max-w-[640px]">
+      <div className="divide-y divide-line">
+        {reviews.map((review) => (
         <article key={review.id} className="py-6">
           <div className="flex items-baseline gap-3">
             <h3 className="font-display min-w-0 truncate text-[21px] font-semibold">
@@ -117,7 +143,16 @@ function ReviewsPanel({
             {review.body}
           </p>
         </article>
-      ))}
+        ))}
+      </div>
+      <Pager
+        page={page}
+        hasMore={hasMore}
+        labels={{ prev: "Newer", next: "Older" }}
+        hrefFor={(p) =>
+          p === 0 ? `/users/${username}` : `/users/${username}?page=${p}`
+        }
+      />
     </div>
   );
 }
