@@ -56,3 +56,43 @@ Judgment calls made while executing the redesign, in the order they came up.
     with no accessible name). Contrast figures in (1) computed from relative
     luminance. No-emoji/no-exclamation checked by script against rendered
     HTML.
+
+# Design decisions — Phase 2 (denormalized counters)
+
+12. **Scoped to `like_count` and `follower_count`/`following_count`, not every
+    count in the app.** The roadmap's Phase 2 lesson is the write-time
+    maintenance *pattern*; it's fully demonstrated by these. `comment_count`
+    (feed), `review_count` (people page), and `shelf_items` counts are the
+    identical mechanism and were deliberately left as read-time aggregates so
+    one phase stays one lesson, not a sweep. Consequence: the feed still runs a
+    `comment_count` subquery and the people page a `_count: { reviews }`
+    aggregate — both flagged in code comments so the partial conversion is
+    intentional and visible, never an oversight.
+
+13. **`following_count` shipped alongside `follower_count` despite the roadmap
+    naming only the latter.** The profile reads both via one `counts()` call;
+    denormalizing one but not the other would leave that call half a column read
+    and half a `COUNT(*)`. They're maintained in the same follow/unfollow
+    statement anyway (one edge, two counters), so it's one transaction either
+    way — the symmetric pair is the natural unit.
+
+14. **Maintenance in a single SQL statement, not a Prisma `$transaction` of two
+    calls.** A CTE (`WITH ins AS (INSERT … RETURNING) UPDATE …`) is atomic by
+    construction and lets the counter delta BE the rows the write produced
+    (`COUNT(*) FROM ins`), so idempotency and the counter agree for free. Two
+    app-level calls would need an explicit transaction and a separate
+    "did it actually insert?" check, with a window between them.
+
+15. **The UPDATE runs even on a no-op like (delta 0).** Trades one dead tuple
+    per duplicate like for a single round-trip that always returns the current
+    count. The alternative (gate the UPDATE on `EXISTS`) avoids the write but
+    returns no row on a no-op, forcing a fallback `SELECT`. Duplicate likes are
+    rare; the always-correct single round-trip is worth the occasional dead
+    tuple (autovacuum reclaims it).
+
+16. **`prisma/bench-seed.sql` committed as a dev tool.** "Produce the numbers
+    yourself" needs a reproducible dataset at a scale where the planner's
+    choices are real. The synthetic rows are namespaced (`bu_`/`br_`) so they
+    never collide with the real seed and can be wiped with one `DELETE … WHERE
+    id LIKE 'bu_%'`. Not wired into `npm run db:seed` — it's opt-in for
+    benchmarking, not part of the demo data.

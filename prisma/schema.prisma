@@ -61,6 +61,14 @@ model User {
   // Nullable by design: the UI renders an initials placeholder, so an avatar
   // is enhancement, not requirement. No upload pipeline yet — just a URL.
   avatarUrl    String?  @map("avatar_url")
+  // Denormalized counters (Phase 2). The truth is the `follows` edge rows;
+  // these are a maintained cache of COUNT(*) over them, kept in the SAME
+  // transaction as every follow/unfollow so reader and counter never diverge.
+  // A single follow write touches TWO users: the follower's following_count
+  // and the followee's follower_count. Backfilled from the edge list; a
+  // reconciliation query (see LEARNING.md) re-derives and corrects drift.
+  followerCount  Int    @default(0) @map("follower_count")
+  followingCount Int    @default(0) @map("following_count")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -233,6 +241,13 @@ model Review {
   userId    String   @map("user_id")
   bookId    String   @map("book_id")
   body      String   @map("body")
+  // Denormalized like counter (Phase 2). Source of truth is the `likes` rows;
+  // maintained +1/-1 in the same statement as the like/unlike write, and only
+  // when a row actually appears/disappears (a duplicate like is a no-op, so it
+  // must NOT bump the counter). Replaces the per-result-row COUNT(*) subquery
+  // the feed used to run. Backfilled; reconcilable. comment_count is the
+  // identical pattern, deliberately deferred (see LEARNING.md / DECISIONS.md).
+  likeCount Int      @default(0) @map("like_count")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

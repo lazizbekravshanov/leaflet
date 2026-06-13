@@ -67,11 +67,12 @@ export const feedRepository = {
                r.book_id,
                r.id             AS review_id,
                r.body,
-               NULL::text       AS shelf_name
+               NULL::text       AS shelf_name,
+               r.like_count                 -- denormalized (Phase 2)
           FROM reviews r
          WHERE r.user_id IN (SELECT followee_id FROM followed)
         UNION ALL
-        -- Source 2: books they shelved
+        -- Source 2: books they shelved (no review, so no likes)
         SELECT 'shelved',
                s.id || ':' || si.book_id,  -- composite-PK rows need a synthetic id
                si.added_at,
@@ -79,7 +80,8 @@ export const feedRepository = {
                si.book_id,
                NULL,
                NULL,
-               s.name
+               s.name,
+               0
           FROM shelf_items si
           JOIN shelves s ON s.id = si.shelf_id
          WHERE s.user_id IN (SELECT followee_id FROM followed)
@@ -99,11 +101,12 @@ export const feedRepository = {
              a.review_id,
              a.body,
              rt.value::int AS rating,
-             -- Scalar subqueries run once per emitted row — bounded by LIMIT,
-             -- so this stays cheap. (For an unbounded report you'd aggregate
-             -- with GROUP BY before joining instead.)
-             COALESCE((SELECT COUNT(*)::int FROM likes l
-                        WHERE l.review_id = a.review_id), 0)    AS like_count,
+             -- like_count is the denormalized reviews.like_count, carried
+             -- through the activity CTE -- no per-row COUNT(*) subquery, no heap
+             -- fetches into the likes table. comment_count is the identical
+             -- pattern, deliberately left as a subquery for now (Phase 2 scope
+             -- is like_count + follower_count; see DECISIONS.md).
+             a.like_count,
              COALESCE((SELECT COUNT(*)::int FROM comments c
                         WHERE c.review_id = a.review_id), 0)    AS comment_count,
              EXISTS(SELECT 1 FROM likes l

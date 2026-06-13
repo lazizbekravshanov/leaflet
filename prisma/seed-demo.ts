@@ -205,6 +205,24 @@ export async function seedDemo(prisma: PrismaClient, bookIds: string[]) {
     }
   }
 
+  // Reconcile the denormalized counters (Phase 2). This seed inserts likes and
+  // follows in bulk via createMany — the right tool for a seed — which
+  // deliberately BYPASSES the per-write counter maintenance in the like/follow
+  // repositories. So we recompute the counters from their source rows once, at
+  // the end: the same backfill the migration runs, and the same "bulk path
+  // skips maintenance, then reconciles" pattern real systems use. Without this,
+  // every seeded review would show like_count 0 in the feed.
+  await prisma.$executeRaw`
+    UPDATE reviews r SET like_count = COALESCE(c.n, 0)
+      FROM (SELECT review_id, COUNT(*)::int AS n FROM likes GROUP BY review_id) c
+     WHERE c.review_id = r.id`;
+  await prisma.$executeRaw`UPDATE reviews SET like_count = 0
+     WHERE id NOT IN (SELECT DISTINCT review_id FROM likes)`;
+  await prisma.$executeRaw`
+    UPDATE users u SET
+      follower_count  = (SELECT COUNT(*) FROM follows f WHERE f.followee_id = u.id),
+      following_count = (SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id)`;
+
   console.log(
     `Demo: ${users.length} users, ${reviewCount} reviews, follows/likes/comments in place.`,
   );

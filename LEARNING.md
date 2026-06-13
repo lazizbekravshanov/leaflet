@@ -175,3 +175,66 @@ you denormalize it into `users.follower_count`?
 
 **Question:** If you run `npm run db:seed` five times, how many rows are in
 `books` and `book_authors`, and which schema features guarantee that?
+
+## 11. Denormalized counters — Phase 2 (reviews.like_count, users.follower_count / following_count)
+
+The shift from **read-time aggregation** (compute `COUNT(*)` every time you
+display a count) to **write-time maintenance** (store the count, adjust it ±1 on
+every write). The count stops being derived and becomes cached state — which
+means it can now be *wrong*, so the whole lesson is keeping it honest.
+
+**Concepts**
+- Read-time vs write-time aggregation: who pays, and when. The `COUNT(*)`
+  version is always correct but pays on every read; the column is one cheap read
+  but pays a maintenance cost (and a correctness risk) on every write.
+- Atomic maintenance in ONE statement. Both `likeRepository.like` and
+  `followRepository.follow` do the row write and the counter bump in a single
+  SQL statement (a CTE) — one implicit transaction. A reader can never see the
+  like row without the +1, and a crash can't apply one without the other.
+- Idempotency that the counter respects. `INSERT … ON CONFLICT DO NOTHING`
+  makes a double-click a no-op; the counter delta is `(SELECT COUNT(*) FROM ins)`
+  — literally the number of rows the write produced, 0 or 1. The classic bug is
+  `ON CONFLICT DO NOTHING` followed by an unconditional `SET n = n + 1`, which
+  inflates on every re-click.
+- Atomic increment vs read-modify-write race. `SET like_count = like_count + 1`
+  is evaluated by Postgres under the row's write lock, so concurrent likes
+  serialize and none is lost. Reading the count into the app and writing back
+  `count + 1` is a lost-update bug under concurrency.
+- One write, two counters. A single follow edge updates the follower's
+  `following_count` AND the followee's `follower_count` — `UPDATE users … WHERE
+  id IN (a, b)` with a per-row `CASE` routes the delta. Same-plan locking order
+  on both follow and unfollow avoids deadlock.
+- Backfill + reconcile as a recurring chore. The migration backfills from the
+  source rows (`UPDATE … FROM (SELECT … GROUP BY)`); a reconciliation query
+  re-derives the truth and finds drift:
+  ```sql
+  SELECT r.id FROM reviews r
+   WHERE r.like_count <> (SELECT COUNT(*) FROM likes l WHERE l.review_id = r.id);
+  ```
+  The `likes`/`follows` rows are the source of truth; the counter is a cache. On
+  disagreement, the rows win — re-run the backfill to converge.
+
+**Numbers** (bench: 2,008 users · 60k follows · 30k reviews · 434k likes;
+`prisma/bench-seed.sql` reproduces it; A/B of the same feed query on the same
+data, like_count via subquery vs column):
+- Feed query, `EXPLAIN (ANALYZE, BUFFERS)` for a user following 30 people
+  (~450 candidate rows → `LIMIT 11`):
+  - BEFORE: the `like_count` `COUNT(*)` ran as a per-result-row **SubPlan
+    Aggregate** (`loops=11`) over an Index Only Scan on `likes`, with
+    **Heap Fetches: 151**. Execution-time median ≈ **5.0 ms**.
+  - AFTER: that SubPlan is **gone** — `like_count` rides along on the reviews
+    row already being read; no heap fetches for it. Median ≈ **4.4 ms**
+    (~10–12% on this query).
+  - Honest caveat: the win is modest because the feed's dominant cost is the
+    *activity* materialization (a Seq Scan over all 30k reviews for the
+    follow semi-join + the ratings hash), NOT the counter subquery. The
+    denormalization's payoff scales with page size and likes-per-review, and
+    that Seq Scan is a separate indexing concern (Phase 3 territory).
+- Profile follower/following: BEFORE two index-only `COUNT(*)` scans over
+  `follows`; AFTER a single `users_pkey` Index Scan returning both columns
+  (~0.05 ms). The structural win — counter cost is independent of how many
+  followers you have — matters more than the microseconds at this scale.
+
+**Question:** When a `like` row and `reviews.like_count` disagree, which is the
+truth, and what keeps them converging? (And: name the exact one-line change to
+the like statement that would silently inflate the counter on every double-click.)

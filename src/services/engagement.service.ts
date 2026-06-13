@@ -15,13 +15,15 @@ async function getReviewOr404(reviewId: string) {
 export const engagementService = {
   async like(userId: string, reviewId: string) {
     await getReviewOr404(reviewId);
-    await likeRepository.like(userId, reviewId);
-    return { count: await likeRepository.countForReview(reviewId) };
+    // The atomic like statement returns the maintained counter — no separate
+    // COUNT(*) round-trip after the write.
+    const count = await likeRepository.like(userId, reviewId);
+    return { count };
   },
 
   async unlike(userId: string, reviewId: string) {
-    await likeRepository.unlike(userId, reviewId);
-    return { count: await likeRepository.countForReview(reviewId) };
+    const count = await likeRepository.unlike(userId, reviewId);
+    return { count };
   },
 
   async addComment(userId: string, reviewId: string, rawBody: unknown) {

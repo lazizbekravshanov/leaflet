@@ -16,12 +16,13 @@ export const landingRepository = {
   // The most-liked review with a decent body length, for the typeset
   // review feature section.
   async featuredReview() {
+    // Orders by the denormalized reviews.like_count (Phase 2) instead of
+    // aggregating the likes table per review.
     const review = await prisma.review.findFirst({
-      orderBy: [{ likes: { _count: "desc" } }, { createdAt: "desc" }],
+      orderBy: [{ likeCount: "desc" }, { createdAt: "desc" }],
       include: {
         user: { select: { username: true } },
         book: true,
-        _count: { select: { likes: true } },
       },
     });
     if (!review) return null;

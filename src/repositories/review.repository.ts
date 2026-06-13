@@ -43,8 +43,9 @@ export const reviewRepository = {
   // Rather than a raw JOIN, fetch reviews then their authors' ratings in a
   // second indexed query and merge in JS. Two round-trips, both index-only;
   // contrast with the single-query raw SQL style in book.repository.search.
-  // Comments and like counts come along via include/_count — note this is
-  // ONE query for all reviews' comments, not one per review (no N+1).
+  // Comments come along via include — ONE query for all reviews' comments,
+  // not one per review (no N+1). Like count is the denormalized
+  // reviews.like_count scalar (Phase 2), not a _count aggregate.
   async listForBook(bookId: string, viewerId: string | null, limit = 20) {
     const reviews = await prisma.review.findMany({
       where: { bookId },
@@ -54,7 +55,6 @@ export const reviewRepository = {
           include: { user: { select: { id: true, username: true } } },
           orderBy: { createdAt: "asc" },
         },
-        _count: { select: { likes: true } },
       },
       orderBy: { createdAt: "desc" }, // served by @@index([bookId, createdAt desc])
       take: limit,
@@ -78,7 +78,7 @@ export const reviewRepository = {
     return reviews.map((review) => ({
       ...review,
       rating: ratingByUser.get(review.userId) ?? null,
-      likeCount: review._count.likes,
+      likeCount: review.likeCount,
       likedByMe: likedIds.has(review.id),
     }));
   },
