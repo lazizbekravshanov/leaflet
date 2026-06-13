@@ -36,6 +36,11 @@ async function main() {
       authorIds.push(record.id);
     }
 
+    // Denormalized author names for the FTS generated column (Phase 4). Set
+    // here because the generated search_vector can't reach the authors table,
+    // and book authorship is only ever written at seed time.
+    const authorsText = entry.authors.map((a) => a.name).join(", ");
+
     await prisma.book.upsert({
       where: { openLibraryId: entry.openLibraryId },
       create: {
@@ -47,6 +52,7 @@ async function main() {
         genres: entry.genres,
         publishedYear: entry.publishedYear,
         pageCount: entry.pageCount,
+        authorsText,
         authors: {
           create: authorIds.map((authorId, position) => ({ authorId, position })),
         },
@@ -59,6 +65,7 @@ async function main() {
         genres: entry.genres,
         publishedYear: entry.publishedYear,
         pageCount: entry.pageCount,
+        authorsText,
       },
     });
   }

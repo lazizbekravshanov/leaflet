@@ -42,6 +42,10 @@ cookies). Can they log in as anyone? Walk through exactly what stops them.
 
 ## 3. Search (src/repositories/book.repository.ts, the migration's trgm index)
 
+> **Superseded by Phase 4 (§13).** Search is now Postgres full-text search with
+> a trigram fallback; the ILIKE query below is the historical starting point.
+> The concepts here (trigram, planner, driver casts) still apply.
+
 **Concepts**
 - Parameterized queries: why `$queryRaw` tagged templates are injection-safe.
 - Trigram (pg_trgm) GIN indexes: substring search as an inverted index over
@@ -309,3 +313,56 @@ read, not an aggregate. No schema change; this is a pure query phase.
 feed's first page, and to how fast a highly-liked old review falls off it. Then:
 the frozen-clock snapshot makes age stable across a scroll — why does that NOT
 make the ranked feed fully stable, and what kind of store would?
+
+## 13. Full-text search — Phase 4 (Postgres FTS + trigram fallback)
+
+Replaces `title ILIKE '%term%'` with Postgres full-text search, and adds trigram
+back as a typo-tolerant fallback — a hybrid. Closes issue #1 (the dropped
+`pg_trgm` indexes) by recreating them AND declaring all search indexes in
+`schema.prisma` so a future diff can't drop them again.
+
+**Concepts**
+- Inverted index. A `tsvector` is the document reduced to normalized lexemes
+  with positions; a GIN index maps lexeme → rows. This is, in miniature, what
+  Elasticsearch is underneath. `WHERE search_vector @@ query` is an index probe,
+  not a scan.
+- Stemming + stop words. `to_tsvector('english', …)` reduces "running" →
+  "run" and drops "the"/"of". So a search for "run" matches "running"
+  (same stem) — but "runing" stems to "rune"/itself and matches nothing.
+- `ts_rank` + weights. `setweight(…, 'A'|'B'|'C')` tags title / authors /
+  description; `ts_rank` scores a title hit above a description hit, so results
+  are relevance-ordered, not just `rating_count`-ordered.
+- Query parsing. `websearch_to_tsquery` turns natural input (quotes for
+  phrases, `OR`, `-term`) into a tsquery without us parsing it. Prefix matching
+  (`tok:*` via `to_tsquery`) is OR'd in for autocomplete on plain word queries.
+- Generated column vs trigger. `search_vector` is `GENERATED ALWAYS AS (…)
+  STORED` — Postgres recomputes it on any row change, no trigger to write or
+  keep correct. The catch: a generated column can only read SAME-ROW columns, so
+  author names (a different table) are denormalized into a plain `authors_text`
+  column first. That denormalization IS the price of avoiding a multi-table
+  trigger; authorship is seed-only, so there's no hot write path to keep in sync.
+- Trigram vs FTS, and why a hybrid. Trigram indexes 3-character grams, so it
+  matches by surface similarity (typo tolerance) with no language model; FTS
+  matches by stem with no fuzziness. They are complementary, so the search runs
+  FTS first and only falls back to a `pg_trgm` similarity query (`title % term`)
+  when FTS returns nothing.
+
+**Numbers** (bench: 50,050 books; ILIKE vs FTS for "run", medians of 5):
+- BEFORE: `title ILIKE '%run%'` — **Seq Scan** over all 50k books, ~**12.8 ms**,
+  and it can't stem or rank.
+- AFTER: `search_vector @@ websearch_to_tsquery('english','run')` — **Bitmap
+  Index Scan on books_search_vector_idx** → top-N heapsort by `ts_rank`,
+  ~**3.8 ms** (~3.4x), and now stemmed + relevance-ranked.
+- Behavior verified on the bench set:
+  - stemming: "run" → 11,251 hits (matches "running"); FTS "runing" → **0**.
+  - typo fallback: trigram on "runing" → **200** hits (similarity ≥ 0.3).
+  - prefix: `dun:*` → "Dune"; author: "herbert" → "Dune" (via weight B).
+
+**Decisions:** config hard-coded `'english'` (multilingual out of scope); FTS is
+primary, trigram is fallback-only (the common path stays pure FTS, one query);
+all three GIN indexes declared in `schema.prisma`.
+
+**Question:** Why does FTS find "running" when you search "run" but not "runing",
+and trigram the reverse? (And: the `search_vector` is a STORED generated column —
+what would break if author names were part of it directly instead of via
+`authors_text`, and why does the generated column force that denormalization?)
