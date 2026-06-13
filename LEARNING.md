@@ -238,3 +238,74 @@ data, like_count via subquery vs column):
 **Question:** When a `like` row and `reviews.like_count` disagree, which is the
 truth, and what keeps them converging? (And: name the exact one-line change to
 the like statement that would silently inflate the counter on every double-click.)
+
+## 12. Feed ranking — Phase 3 (sort=top: engagement vs recency)
+
+A second feed mode that orders by a score instead of by time, with the
+chronological feed kept as a toggle (`?sort=new|top`). Phase 2's
+`reviews.like_count` is the input that makes this cheap — engagement is a column
+read, not an aggregate. No schema change; this is a pure query phase.
+
+**Concepts**
+- Scoring function (Hacker News shape):
+  `score = (like_count + 1) / (age_hours + 2) ^ 1.8`. The `+1` keeps zero-like
+  items (and every shelving, which has no review) ranking by recency instead of
+  collapsing to 0; the `+2` stops brand-new items dividing by ~0; `1.8` is the
+  decay gravity. Tunable knobs with intuitive effects: raise gravity → recency
+  dominates; raise the vote smoothing → likes matter less for new items.
+- Ranking forfeits the index. A keyset on `(created_at, id)` can in principle be
+  served sortless (MergeAppend over per-source indexes). A keyset on a
+  `now()`-dependent COMPUTED score can NEVER be indexed — the query must compute
+  the score for every candidate and Sort. Measured: both modes top-N heapsort
+  today, but ranked also pays a `power()` per candidate + a second sort.
+- Keyset pagination under ranking is unstable, and the fix is a frozen clock.
+  Two things move scores between page requests: (a) time passes (age grows), and
+  (b) likes change. We kill (a) by snapshotting the scoring instant on page 1 and
+  threading it through the cursor (`["top", snapshotAtMs, score, itemId]`), so
+  age is measured from one fixed moment for the whole scroll. (b) is left live
+  and is the documented residual.
+- Why an item can appear on two consecutive pages (the roadmap question,
+  reproduced live): page 1 returns items 1–10 and hands page 2 the cursor
+  `(score@10, id@10)`. Page 2 asks for `(score, id) < cursor`. If an item that
+  was on page 1 (say rank 9) loses a few likes between the two requests, its
+  live score drops just below the frozen cursor — so it now satisfies the page-2
+  predicate and is served AGAIN. (The dual: an item just below the cursor that
+  GAINS likes jumps above it and is skipped entirely.) The frozen clock prevents
+  the time-decay version of this; only a materialized ranked snapshot / score
+  buckets / fan-out-on-write removes the like-mutation version — that's deferred,
+  not built here.
+- Cursors are mode-tagged. `new` and `top` cursors carry different keys, so the
+  first array element is the mode; a cursor minted in one mode is rejected
+  against the other instead of being silently miscompared.
+
+**Numbers** (bench: same 2,008-user / 434k-like set; `bu_1` follows 30 people →
+~450 candidate rows → `LIMIT 11`; A/B `EXPLAIN (ANALYZE, BUFFERS)`, medians of 5):
+- `sort=new`: ~**3.5 ms**. Top-N heapsort on `(at, id)` over a Seq Scan of the
+  followee reviews.
+- `sort=top`: ~**8.4 ms** (~**2.4x**). Same Seq Scan, but a top-N heapsort keyed
+  on the full `power()` score expression (`Sort Key: ((like_count+1)/power(...))`),
+  then a second sort of the joined page. The cost is the price of ranking: a
+  transcendental per candidate and an unindexable key.
+- Pagination correctness, verified on the bench set:
+  - Frozen clock, nothing changes → page-2 keyset matches ground-truth rows
+    11–20 exactly, **0 overlap** with page 1 (no dup, no skip).
+  - Like-count change mid-scroll → the rank-9 item, after losing 3 likes,
+    reappears at **position 1 of page 2** — a reproduced duplicate.
+
+**Gotchas found (both real, both caught before deploy):**
+- The score expression is `numeric` (extract/power return numeric), and
+  node-postgres hands `numeric` back as a STRING. That string went into the
+  cursor, and the keyset comparison silently failed — page 1 returned items with
+  a `nextCursor`, but page 2 came back empty. Fix: `::float8` on the score, so it
+  crosses the driver boundary as a JS number and round-trips losslessly. This is
+  the exact "casts matter at the driver boundary" note from `book.repository`,
+  but load-bearing for correctness here, not just for clean numbers.
+- `prisma/bench-seed.sql` bulk-inserts likes but originally never reconciled
+  `reviews.like_count`, so the ranked feed first ran on all-zero engagement
+  (pure recency). Same bulk-bypass lesson as the seed — fixed by adding the
+  reconcile UPDATE to the bench script.
+
+**Question:** You raise the gravity from 1.8 to 3.0. Describe what happens to the
+feed's first page, and to how fast a highly-liked old review falls off it. Then:
+the frozen-clock snapshot makes age stable across a scroll — why does that NOT
+make the ranked feed fully stable, and what kind of store would?

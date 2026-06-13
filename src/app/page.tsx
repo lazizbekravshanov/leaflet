@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
-import { feedService } from "@/services/feed.service";
+import { feedService, parseSort, type FeedSort } from "@/services/feed.service";
 import { shelfService } from "@/services/shelf.service";
 import { landingRepository } from "@/repositories/landing.repository";
 import { FeedList } from "@/components/FeedList";
@@ -10,16 +10,23 @@ import { BookCover } from "@/components/BookCover";
 import { Hero } from "@/components/landing/Hero";
 import { Features, Closing } from "@/components/landing/Features";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) return <Landing />;
+
+  const sort = parseSort((await searchParams).sort);
 
   return (
     <div className="mx-auto max-w-[1080px] px-5 py-10 xl:grid xl:grid-cols-[1fr_640px_1fr] xl:gap-10">
       <div className="hidden xl:block" />
       <div className="mx-auto w-full max-w-[640px] xl:mx-0 xl:max-w-none">
-        <Suspense fallback={<FeedSkeleton />}>
-          <FeedSection userId={user.id} />
+        <FeedToggle sort={sort} />
+        <Suspense key={sort} fallback={<FeedSkeleton />}>
+          <FeedSection userId={user.id} sort={sort} />
         </Suspense>
       </div>
       <aside className="hidden xl:block">
@@ -31,8 +38,41 @@ export default async function HomePage() {
   );
 }
 
-async function FeedSection({ userId }: { userId: string }) {
-  const page = await feedService.getPage(userId, null);
+// Quiet segmented toggle: editorial, monochrome, the active tab carries the
+// one ink-green accent. URL-driven (?sort=) so it's deep-linkable and the
+// server renders the right feed — no client state for which mode is active.
+function FeedToggle({ sort }: { sort: FeedSort }) {
+  const tabs = [
+    { key: "new" as const, label: "Latest", href: "/" },
+    { key: "top" as const, label: "Top", href: "/?sort=top" },
+  ];
+  return (
+    <div className="mb-2 flex gap-5 border-b border-line pb-3">
+      {tabs.map((t) => (
+        <Link
+          key={t.key}
+          href={t.href}
+          className={
+            sort === t.key
+              ? "text-[15px] font-medium text-accent"
+              : "text-[15px] text-ink-secondary transition-colors duration-150 hover:text-ink"
+          }
+        >
+          {t.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+async function FeedSection({
+  userId,
+  sort,
+}: {
+  userId: string;
+  sort: FeedSort;
+}) {
+  const page = await feedService.getPage(userId, null, sort);
 
   if (page.items.length === 0) {
     return (
@@ -53,7 +93,13 @@ async function FeedSection({ userId }: { userId: string }) {
     );
   }
 
-  return <FeedList initialItems={page.items} initialCursor={page.nextCursor} />;
+  return (
+    <FeedList
+      initialItems={page.items}
+      initialCursor={page.nextCursor}
+      sort={sort}
+    />
+  );
 }
 
 // Right rail, ≥1280px only: a quiet, label-light "Currently reading" module.

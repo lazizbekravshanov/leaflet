@@ -9,9 +9,11 @@ import type { FeedItemDto, FeedPageDto } from "@/lib/feed-types";
 export function FeedList({
   initialItems,
   initialCursor,
+  sort = "new",
 }: {
   initialItems: FeedItemDto[];
   initialCursor: string | null;
+  sort?: "new" | "top";
 }) {
   const [items, setItems] = useState(initialItems);
   const [cursor, setCursor] = useState(initialCursor);
@@ -20,7 +22,11 @@ export function FeedList({
   async function loadMore() {
     if (!cursor) return;
     setBusy(true);
-    const res = await fetch(`/api/feed?cursor=${encodeURIComponent(cursor)}`);
+    // sort must match the mode the cursor was minted in — the server rejects a
+    // cross-mode cursor.
+    const res = await fetch(
+      `/api/feed?sort=${sort}&cursor=${encodeURIComponent(cursor)}`,
+    );
     if (res.ok) {
       const page = (await res.json()) as FeedPageDto;
       setItems([...items, ...page.items]);

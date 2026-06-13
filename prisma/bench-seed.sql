@@ -68,6 +68,19 @@ CROSS JOIN LATERAL (
 WHERE r.id LIKE 'br_%'
 ON CONFLICT DO NOTHING;
 
+-- Reconcile the denormalized counters (Phase 2). The bulk INSERTs above write
+-- to `likes`/`follows` directly and bypass the per-write counter maintenance in
+-- the repositories, so the columns are stale until we recompute them from the
+-- source rows. Without this, reviews.like_count stays 0 and the ranked feed
+-- (Phase 3) sees no engagement. Same backfill the migration and seed-demo run.
+UPDATE reviews r SET like_count = COALESCE(c.n, 0)
+  FROM (SELECT review_id, COUNT(*)::int AS n FROM likes GROUP BY review_id) c
+ WHERE c.review_id = r.id;
+UPDATE reviews SET like_count = 0 WHERE id NOT IN (SELECT DISTINCT review_id FROM likes);
+UPDATE users u SET
+  follower_count  = (SELECT COUNT(*) FROM follows f WHERE f.followee_id = u.id),
+  following_count = (SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id);
+
 ANALYZE users; ANALYZE follows; ANALYZE reviews; ANALYZE ratings; ANALYZE likes;
 
 SELECT
