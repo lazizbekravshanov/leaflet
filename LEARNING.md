@@ -360,7 +360,11 @@ back as a typo-tolerant fallback — a hybrid. Closes issue #1 (the dropped
 
 **Decisions:** config hard-coded `'english'` (multilingual out of scope); FTS is
 primary, trigram is fallback-only (the common path stays pure FTS, one query);
-all three GIN indexes declared in `schema.prisma`.
+all three GIN indexes declared in `schema.prisma`. Prisma caveat: it models the
+`Unsupported("tsvector")` column as plain, so `prisma migrate dev` reports drift
+and emits `ALTER COLUMN search_vector DROP DEFAULT` (which fails on a generated
+column) — delete that line, or hand-write migrations. The column and the GIN
+indexes themselves are preserved; only the generated-ness confuses the differ.
 
 **Question:** Why does FTS find "running" when you search "run" but not "runing",
 and trigram the reverse? (And: the `search_vector` is a STORED generated column —

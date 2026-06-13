@@ -50,11 +50,16 @@ export const bookRepository = {
   //   both language-aware ranking AND typo tolerance. Two round-trips only on
   //   the rare empty-FTS path.
   async search(term: string, limit: number): Promise<BookSearchRow[]> {
-    // Prefix only for simple word queries (no quotes/operators). Sanitize the
-    // trailing token to letters/digits so to_tsquery can't choke on it.
-    const simple = /^[\p{L}\p{N}\s]+$/u.test(term);
-    const lastToken = simple ? (term.trim().split(/\s+/).pop() ?? "") : "";
-    const prefixLexeme = lastToken.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+    // Prefix matching is an autocomplete aid for a SINGLE partial word ("dun"
+    // -> "Dune"). Restrict it to a lone letters/digits token: OR-ing a prefix
+    // into a multi-word query broadens the AND ("frank herbert" would also
+    // match "herbert:*") and can rank a junk hit above the precise one. Quoted
+    // / operator input is also excluded (it isn't a single bare token).
+    const tokens = term.trim().split(/\s+/);
+    const prefixLexeme =
+      tokens.length === 1 && /^[\p{L}\p{N}]+$/u.test(tokens[0] ?? "")
+        ? tokens[0]!.toLowerCase()
+        : "";
 
     const tsquery =
       prefixLexeme.length > 0

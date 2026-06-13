@@ -150,8 +150,12 @@ model Book {
   // Full-text search vector. GENERATED ALWAYS AS (...) STORED — built in the
   // migration (Prisma can't express the generated expression), so it stays in
   // sync with title/authors_text/description automatically with no trigger.
-  // Unsupported => the client ignores it, but Prisma KEEPS the column instead
-  // of dropping it on the next diff.
+  // Unsupported => the client ignores the column and keeps it (it is NOT
+  // dropped on diff). CAVEAT: Prisma models it as a plain column, so a future
+  // `prisma migrate dev` reports drift and emits `ALTER COLUMN search_vector
+  // DROP DEFAULT` — which FAILS on a generated column. Delete that line from
+  // any generated migration (or hand-write migrations, as we do). The GIN
+  // indexes below ARE diff-clean and preserved (verified).
   searchVector  Unsupported("tsvector")? @map("search_vector")
 
   authors    BookAuthor[]
