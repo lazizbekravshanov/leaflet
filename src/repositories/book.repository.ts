@@ -13,12 +13,11 @@ export type BookSearchRow = {
   rating_count: number;
 };
 
-// The display projection, shared by the FTS and trigram-fallback queries. The
-// scalar subqueries (authors, avg, count) run per RESULT row — fine under
-// LIMIT 20, wrong for unbounded sets (a LEFT JOIN + GROUP BY would aggregate
-// before LIMIT). Casts matter at the driver boundary: COUNT(*) is bigint and
-// AVG() is numeric (both arrive as strings); ::int / ::float8 make plain JS
-// numbers.
+// The display projection, shared by the FTS and trigram-fallback queries.
+// avg_rating/rating_count read the denormalized columns (Phase 5 cache) — no
+// per-result-row AVG/COUNT subquery over `ratings` anymore. authors stays a
+// per-row subquery (bounded by LIMIT; authors_text exists but the ordered,
+// comma-joined display string is what the UI wants).
 const SEARCH_COLUMNS = Prisma.sql`
   b.id,
   b.title,
@@ -27,8 +26,8 @@ const SEARCH_COLUMNS = Prisma.sql`
   (SELECT string_agg(a.name, ', ' ORDER BY ba.position)
      FROM book_authors ba JOIN authors a ON a.id = ba.author_id
     WHERE ba.book_id = b.id)                                AS authors,
-  (SELECT AVG(r.value)::float8 FROM ratings r WHERE r.book_id = b.id) AS avg_rating,
-  (SELECT COUNT(*)::int       FROM ratings r WHERE r.book_id = b.id)  AS rating_count
+  b.avg_rating,
+  b.rating_count
 `;
 
 export const bookRepository = {
@@ -104,14 +103,14 @@ export const bookRepository = {
     });
   },
 
-  // Aggregate over the narrow ratings table — this is the payoff of keeping
-  // Rating separate from Review (see schema.prisma).
+  // Reads the denormalized aggregate (Phase 5 cache) off the book row instead
+  // of running AVG/COUNT over `ratings` on every book-page view. Maintained in
+  // the same transaction as each rating write (see reviewRepository).
   async getRatingStats(bookId: string) {
-    const agg = await prisma.rating.aggregate({
-      where: { bookId },
-      _avg: { value: true },
-      _count: true,
+    const book = await prisma.book.findUnique({
+      where: { id: bookId },
+      select: { avgRating: true, ratingCount: true },
     });
-    return { average: agg._avg.value, count: agg._count };
+    return { average: book?.avgRating ?? null, count: book?.ratingCount ?? 0 };
   },
 };

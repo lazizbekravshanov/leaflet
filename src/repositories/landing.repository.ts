@@ -8,7 +8,9 @@ export const landingRepository = {
   coverBooks(limit: number) {
     return prisma.book.findMany({
       where: { coverId: { not: null } },
-      orderBy: [{ ratings: { _count: "desc" } }, { title: "asc" }],
+      // Orders by the denormalized rating_count (Phase 5 cache) instead of an
+      // aggregate over `ratings`.
+      orderBy: [{ ratingCount: "desc" }, { title: "asc" }],
       take: limit,
     });
   },

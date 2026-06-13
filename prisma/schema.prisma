@@ -69,6 +69,10 @@ model User {
   // reconciliation query (see LEARNING.md) re-derives and corrects drift.
   followerCount  Int    @default(0) @map("follower_count")
   followingCount Int    @default(0) @map("following_count")
+  // Denormalized review count (Phase 5 — the review_count deferred in Phase 2).
+  // Recomputed from `reviews` on review create/delete; serves the people
+  // directory without a COUNT(*) per row.
+  reviewCount    Int    @default(0) @map("review_count")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -141,6 +145,12 @@ model Book {
   genres        String[] @default([]) @map("genres")
   publishedYear Int?     @map("published_year")
   pageCount     Int?     @map("page_count")
+  // Denormalized rating aggregate (Phase 5 cache). Recomputed from `ratings`
+  // in the same transaction as every rating write/delete — a materialized
+  // cache with synchronous invalidation. Replaces the per-result-row AVG/COUNT
+  // subqueries search ran over `ratings`. avg_rating is NULL when unrated.
+  avgRating     Float?   @map("avg_rating")
+  ratingCount   Int      @default(0) @map("rating_count")
   // Denormalized author names (Phase 4). A generated tsvector can only
   // reference same-row columns, so author names are concatenated here (at seed
   // time — books/authors have no user-edit path) to feed search_vector.
@@ -268,6 +278,10 @@ model Review {
   // the feed used to run. Backfilled; reconcilable. comment_count is the
   // identical pattern, deliberately deferred (see LEARNING.md / DECISIONS.md).
   likeCount Int      @default(0) @map("like_count")
+  // Denormalized comment counter (Phase 5 — the comment_count deferred in
+  // Phase 2). Maintained +1/-1 atomically with the comment write, like
+  // like_count; replaces the feed's last per-row COUNT(*) subquery.
+  commentCount Int   @default(0) @map("comment_count")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

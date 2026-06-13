@@ -102,7 +102,13 @@ UPDATE users u SET
   follower_count  = (SELECT COUNT(*) FROM follows f WHERE f.followee_id = u.id),
   following_count = (SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id);
 
-ANALYZE users; ANALYZE follows; ANALYZE reviews; ANALYZE ratings; ANALYZE likes;
+-- Phase 5 caches/counters from source.
+UPDATE users u SET review_count = (SELECT COUNT(*) FROM reviews rv WHERE rv.user_id = u.id);
+UPDATE books b SET rating_count = COALESCE(c.n, 0), avg_rating = c.avg
+  FROM (SELECT book_id, COUNT(*)::int AS n, AVG(value)::float8 AS avg FROM ratings GROUP BY book_id) c
+ WHERE c.book_id = b.id;
+
+ANALYZE users; ANALYZE follows; ANALYZE reviews; ANALYZE ratings; ANALYZE likes; ANALYZE books;
 
 SELECT
   (SELECT count(*) FROM users)   AS users,

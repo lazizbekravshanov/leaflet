@@ -1,5 +1,25 @@
 import { prisma } from "@/lib/db";
 
+// The denormalized caches a review/rating write touches: the book's rating
+// aggregate (recomputed from `ratings`) and the user's review_count (from
+// `reviews`). Returned as transaction STEPS so they run in the same tx as the
+// write — synchronous invalidation, never a separate round-trip that could
+// crash between the write and the cache update. AVG over zero rows is NULL,
+// which is exactly "unrated".
+function recomputeForReviewWrite(userId: string, bookId: string) {
+  return [
+    prisma.$executeRaw`
+      UPDATE books SET
+        rating_count = (SELECT COUNT(*)::int  FROM ratings WHERE book_id = ${bookId}),
+        avg_rating   = (SELECT AVG(value)::float8 FROM ratings WHERE book_id = ${bookId})
+       WHERE id = ${bookId}`,
+    prisma.$executeRaw`
+      UPDATE users SET
+        review_count = (SELECT COUNT(*)::int FROM reviews WHERE user_id = ${userId})
+       WHERE id = ${userId}`,
+  ];
+}
+
 export const reviewRepository = {
   // Review + rating are separate tables (see schema.prisma for the tradeoff),
   // so "review with stars" is two upserts in one transaction: both land or
@@ -22,6 +42,12 @@ export const reviewRepository = {
         create: { userId, bookId, value: rating },
         update: { value: rating },
       }),
+      // Invalidate the denormalized caches by recomputing from source, in the
+      // SAME transaction — they recompute against the just-written rows, so a
+      // reader never sees the review/rating without the updated aggregate.
+      // Upsert means "new or edit"; recompute (vs ±1) is correct for both
+      // without detecting which happened.
+      ...recomputeForReviewWrite(userId, bookId),
     ]);
   },
 
@@ -36,6 +62,9 @@ export const reviewRepository = {
     return prisma.$transaction([
       prisma.review.delete({ where: { id: reviewId } }),
       prisma.rating.deleteMany({ where: { userId, bookId } }),
+      // Same recompute after the rows are gone (book loses a rating, user loses
+      // a review). Comment/like counts ride the cascade away with the review.
+      ...recomputeForReviewWrite(userId, bookId),
     ]);
   },
 

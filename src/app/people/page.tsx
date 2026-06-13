@@ -53,8 +53,8 @@ export default async function PeoplePage() {
                 <p className="tnum mt-0.5 text-[13px] text-ink-secondary">
                   {person.followerCount} follower
                   {person.followerCount === 1 ? "" : "s"} ·{" "}
-                  {person._count.reviews} review
-                  {person._count.reviews === 1 ? "" : "s"}
+                  {person.reviewCount} review
+                  {person.reviewCount === 1 ? "" : "s"}
                 </p>
               </div>
               <FollowButton

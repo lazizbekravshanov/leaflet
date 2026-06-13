@@ -223,6 +223,22 @@ export async function seedDemo(prisma: PrismaClient, bookIds: string[]) {
       follower_count  = (SELECT COUNT(*) FROM follows f WHERE f.followee_id = u.id),
       following_count = (SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id)`;
 
+  // Phase 5 caches/counters — same bulk-bypass reconcile.
+  await prisma.$executeRaw`
+    UPDATE reviews r SET comment_count = COALESCE(c.n, 0)
+      FROM (SELECT review_id, COUNT(*)::int AS n FROM comments GROUP BY review_id) c
+     WHERE c.review_id = r.id`;
+  await prisma.$executeRaw`UPDATE reviews SET comment_count = 0
+     WHERE id NOT IN (SELECT DISTINCT review_id FROM comments)`;
+  await prisma.$executeRaw`
+    UPDATE users u SET review_count = (SELECT COUNT(*) FROM reviews rv WHERE rv.user_id = u.id)`;
+  await prisma.$executeRaw`
+    UPDATE books b SET rating_count = COALESCE(c.n, 0), avg_rating = c.avg
+      FROM (SELECT book_id, COUNT(*)::int AS n, AVG(value)::float8 AS avg FROM ratings GROUP BY book_id) c
+     WHERE c.book_id = b.id`;
+  await prisma.$executeRaw`UPDATE books SET rating_count = 0, avg_rating = NULL
+     WHERE id NOT IN (SELECT DISTINCT book_id FROM ratings)`;
+
   console.log(
     `Demo: ${users.length} users, ${reviewCount} reviews, follows/likes/comments in place.`,
   );

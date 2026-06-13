@@ -29,10 +29,9 @@ export const userRepository = {
     return prisma.user.update({ where: { id }, data });
   },
 
-  // The people directory: every user plus relationship counts. follower_count
-  // is the denormalized column (Phase 2) — a scalar read, no COUNT(*) over
-  // `follows`. review_count is the same pattern, deliberately deferred, so it
-  // stays a _count aggregate for now (see DECISIONS.md).
+  // The people directory: every user plus relationship counts, now both
+  // denormalized columns (follower_count from Phase 2, review_count from
+  // Phase 5) — two scalar reads, no COUNT(*) subqueries at all.
   listAll() {
     return prisma.user.findMany({
       select: {
@@ -41,7 +40,7 @@ export const userRepository = {
         bio: true,
         avatarUrl: true,
         followerCount: true,
-        _count: { select: { reviews: true } },
+        reviewCount: true,
       },
       orderBy: { createdAt: "asc" },
     });
