@@ -68,6 +68,27 @@ CROSS JOIN LATERAL (
 WHERE r.id LIKE 'br_%'
 ON CONFLICT DO NOTHING;
 
+-- 50,000 synthetic books (Phase 4 search benchmark) ------------------------
+-- Inserted AFTER the review/like block above so those still reference the 50
+-- real books; these add catalog scale so the FTS GIN index beats a seq scan.
+-- Only columns that exist pre-migration are set (no authors_text) so this file
+-- runs against both schemas; the generated search_vector derives from
+-- title+description for these. Titles/descriptions seed real lexemes
+-- ("running", "sailing", …) so stemming and typo-fallback are demonstrable.
+INSERT INTO books (id, open_library_id, title, description, cover_id, published_year, created_at)
+SELECT 'bb_'||g,
+       'OLBENCH'||g||'W',
+       initcap((ARRAY['the','a','silent','burning','hidden','lost','northern','crimson','endless','running'])[1+(g%10)])
+         ||' '||(ARRAY['Garden','Empire','River','House','Song','Light','Sea','Forest','Crown','Machine'])[1+((g/10)%10)]
+         ||' of '||(ARRAY['Dust','Glass','Salt','Iron','Echoes','Ash','Mirrors','Thorns','Tide','Smoke'])[1+((g/100)%10)],
+       'A story of '||(ARRAY['running','sailing','building','dreaming','wandering','fighting','loving','searching'])[1+(g%8)]
+         ||' across '||(ARRAY['empires','oceans','centuries','cities','deserts','memories'])[1+((g/7)%6)]||'.',
+       (g % 1000),
+       1900 + (g % 125),
+       now()
+FROM generate_series(1, 50000) g
+ON CONFLICT DO NOTHING;
+
 -- Reconcile the denormalized counters (Phase 2). The bulk INSERTs above write
 -- to `likes`/`follows` directly and bypass the per-write counter maintenance in
 -- the repositories, so the columns are stale until we recompute them from the
