@@ -474,3 +474,46 @@ already-followed rows; the precompute fired lazily on first `/people` visit.
 **Question:** Why does the 2-hop query explode on a dense graph, and how do
 LIMIT-per-hop (online) and precomputation (offline) each tame it — what does each
 give up?
+
+## 17. Tests & CI
+
+A safety net for everything above — the invariants that were verified by hand
+each phase are now pinned, and run on every push.
+
+**Concepts**
+- Two test tiers. UNIT tests cover pure logic with no DB (validation incl. the
+  72-byte password rule, the CSRF origin check) — fast, deterministic. INTEGRATION
+  tests are the real value here, because this project IS its SQL: they run the
+  actual repositories/services against a real throwaway Postgres and assert the
+  resulting rows. They double as executable documentation of each phase's
+  invariant.
+- What's pinned. like/follow counter maintenance is idempotent (a double-like
+  adds nothing); the rating cache recomputes avg/count on write, edit, and
+  delete; comment_count tracks; the rate limiter trips at its limit and buckets
+  are independent; FTS stems ("run"→"running") while the trigram fallback
+  catches typos; recommendations surface 2-hop candidates by mutual count and
+  taste, never self/already-followed; the feed keyset-pages with no overlap and
+  rejects a cross-mode cursor.
+- Isolation without truncation. Each test mints fixtures with unique ids
+  (`uid()`), so tests never collide and need no teardown between them — they
+  assert only on the rows they created. Vitest runs files serially
+  (`fileParallelism: false`) since they share one database.
+- A safety RAIL, not just a default. `tests/setup.ts` refuses to run unless
+  `DATABASE_URL` names a database containing "test", so a stray prod/dev URL in
+  the environment can never be written to by the suite.
+- Why Vitest over node:test. It resolves the `@/` path alias out of the box, so
+  integration tests import `@/repositories/*` exactly as the app does.
+- CI (`.github/workflows/ci.yml`): a Postgres service container, then migrate →
+  lint → typecheck → test → build on every push/PR. A second workflow runs
+  `prisma migrate deploy` against Neon on push to main (the long-deferred
+  automation of the manual migration step) — it no-ops until the
+  `NEON_DATABASE_URL` secret is set, and that secret must use the DIRECT
+  (non-`-pooler`) host so DDL/advisory locks work.
+
+**Run:** `npm test` (needs a migrated test DB — locally a throwaway Postgres,
+in CI the service container). 29 tests today; new features extend the same
+fixtures.
+
+**Question:** The integration tests share one database and create rows without
+cleaning up — why doesn't that make them flaky, and what would break that
+property?

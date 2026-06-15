@@ -1,0 +1,36 @@
+name: Deploy migrations (Neon)
+
+# Closes the manual-migration gap: applies pending Prisma migrations to
+# production on every push to main, BEFORE Vercel serves the new code. Additive
+# migrations are backward-compatible, so running them just ahead of the deploy
+# is safe.
+#
+# SETUP REQUIRED (one time): add a repository secret NEON_DATABASE_URL = your
+# Neon connection string with `-pooler` REMOVED from the host (migrations need a
+# direct connection; the pgbouncer pooler can't do DDL/advisory locks). Until
+# the secret is set, this workflow no-ops instead of failing.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+
+      - name: prisma migrate deploy
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          if [ -z "$NEON_DATABASE_URL" ]; then
+            echo "NEON_DATABASE_URL secret not set — skipping (add it to enable auto-migrate)."
+            exit 0
+          fi
+          DATABASE_URL="$NEON_DATABASE_URL" npx prisma migrate deploy
