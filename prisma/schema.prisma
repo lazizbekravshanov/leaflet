@@ -61,6 +61,10 @@ model User {
   // Nullable by design: the UI renders an initials placeholder, so an avatar
   // is enhancement, not requirement. No upload pipeline yet — just a URL.
   avatarUrl    String?  @map("avatar_url")
+  // Email verification (account system). NULL = unverified; set to the verify
+  // timestamp when the user clicks the emailed link. Login is allowed while
+  // unverified — the app just nudges with a banner.
+  emailVerifiedAt DateTime? @map("email_verified_at")
   // Denormalized counters (Phase 2). The truth is the `follows` edge rows;
   // these are a maintained cache of COUNT(*) over them, kept in the SAME
   // transaction as every follow/unfollow so reader and counter never diverge.
@@ -76,7 +80,8 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  sessions  Session[]
+  sessions   Session[]
+  authTokens AuthToken[]
   shelves   Shelf[]
   reviews   Review[]
   ratings   Rating[]
@@ -113,6 +118,26 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+// Single-use, expiring tokens for email verification and password reset. Same
+// security model as Session: the emailed link carries the RAW token, the DB
+// stores only its SHA-256 hash, so a DB dump can't be turned into a valid
+// link. used_at makes a token one-shot; a cleanup ranges over expires_at.
+model AuthToken {
+  id        String    @id @default(cuid()) @map("id")
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  purpose   String    @map("purpose") // "verify" | "reset"
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_tokens")
 }
 
 // ── Catalog ─────────────────────────────────────────────────────────────────

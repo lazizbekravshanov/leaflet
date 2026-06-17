@@ -517,3 +517,48 @@ fixtures.
 **Question:** The integration tests share one database and create rows without
 cleaning up — why doesn't that make them flaky, and what would break that
 property?
+
+## 18. Account lifecycle — email verification, password reset, change password
+
+The standard account system, built on the existing session/bcrypt foundation.
+
+**Concepts**
+- One-time tokens, same model as sessions. Verification and reset links carry a
+  256-bit CSPRNG token; the DB (`auth_tokens`) stores only its SHA-256 hash, so
+  a dump can't be turned into a working link. A token is single-use (`used_at`
+  set under a `usedAt: null` guard, so concurrent consumes race and one wins)
+  and expiring (verify 24h, reset 1h).
+- Side effects don't ride on GET. Verifying consumes a token, so the link lands
+  on a page with a button that POSTs — a link scanner or prefetch can't burn the
+  token before the user clicks.
+- Enumeration-safe reset. "Forgot password" always returns the same generic
+  response and only sends mail if the account exists, so the endpoint can't be
+  used to discover which emails are registered. (Same principle as login's
+  dummy-bcrypt timing defense.)
+- Session hygiene on credential change. A RESET drops every session (the account
+  may be compromised); a CHANGE keeps the current device and kills the rest (a
+  hijacked session dies, but you stay logged in where you made the change) — done
+  by deleting all sessions whose token-hash isn't the current one.
+- Pluggable, fail-soft mail. `lib/mail.ts` sends via Resend (raw fetch, no SDK)
+  when `RESEND_API_KEY` is set, else logs the message to the server console — so
+  the whole flow is testable with zero external accounts. A send failure is
+  logged, never thrown, so degraded mail can't 500 signup/reset.
+- Verification is a nudge, not a gate. Login works while unverified; a slim
+  banner offers a resend. Demo accounts are pre-verified in the seed.
+
+**Verified:** unit + integration tests (token single-use/expiry/purpose,
+verifyEmail, enumeration-safe reset, reset drops sessions, change-password keeps
+only the current session); plus a live console-mailer run — signup → captured
+verify link → verified; forgot → captured reset link → new password logs in, old
+one 401s.
+
+**Production env (to send real email + correct links):** set `RESEND_API_KEY`,
+`MAIL_FROM`, and `APP_URL` (e.g. https://leaflet-gules.vercel.app). Without them
+it still works — mail goes to the function logs and links point at localhost.
+
+**Question:** Why store only the token's SHA-256 hash and not the token itself,
+and why is bcrypt the WRONG choice for hashing these tokens (when it's the right
+choice for passwords)?
+
+**Still open (the one piece that needs your setup):** "Sign in with Google" —
+OAuth needs a Google Cloud client ID/secret, so it's a separate track.

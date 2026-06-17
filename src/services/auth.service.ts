@@ -3,10 +3,13 @@
 // src/lib/auth.ts; this service only knows users, passwords, and sessions.
 import { createHash, randomBytes } from "node:crypto";
 import bcrypt from "bcrypt";
-import { AuthError, ConflictError } from "@/lib/errors";
+import { AuthError, ConflictError, ValidationError } from "@/lib/errors";
 import { requireEmail, requireString, requireUsername } from "@/lib/validate";
 import { userRepository } from "@/repositories/user.repository";
 import { sessionRepository } from "@/repositories/session.repository";
+import { tokenRepository } from "@/repositories/token.repository";
+import { sendMail } from "@/lib/mail";
+import { appUrl } from "@/lib/app-url";
 
 // bcrypt cost 12 ≈ 250ms per hash on current hardware. That is the point: an
 // attacker with a stolen password_hash column can try ~4 guesses/second/core
@@ -15,6 +18,23 @@ import { sessionRepository } from "@/repositories/session.repository";
 const BCRYPT_COST = 12;
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days, absolute expiry
+const VERIFY_TTL_MS = 24 * 60 * 60 * 1000; // email-verification link: 24h
+const RESET_TTL_MS = 60 * 60 * 1000; // password-reset link: 1h (short on purpose)
+
+// Issue a fresh verification token (invalidating any prior one) and email the
+// link. Shared by signup and the resend endpoint.
+async function sendVerificationEmail(userId: string, email: string) {
+  await tokenRepository.invalidateForUser(userId, "verify");
+  const token = await tokenRepository.create(userId, "verify", VERIFY_TTL_MS);
+  await sendMail({
+    to: email,
+    subject: "Confirm your email for Leaflet",
+    text:
+      `Welcome to Leaflet. Confirm your email by opening this link:\n\n` +
+      `${appUrl(`/verify?token=${token}`)}\n\n` +
+      `The link expires in 24 hours. If you didn't sign up, ignore this message.`,
+  });
+}
 
 // Hash a session token for storage. SHA-256, NOT bcrypt, and that's correct:
 // bcrypt's slowness exists to protect low-entropy human passwords. A session
@@ -69,6 +89,9 @@ export const authService = {
     }
 
     const session = await createSession(user.id);
+    // Fire the verification email (best-effort — sendMail never throws). The
+    // user is logged in immediately; verification is a nudge, not a gate.
+    await sendVerificationEmail(user.id, email);
     return { user, session };
   },
 
@@ -109,6 +132,81 @@ export const authService = {
   async getUserForToken(token: string) {
     const session = await sessionRepository.findValidWithUser(hashToken(token));
     return session?.user ?? null;
+  },
+
+  // Re-send the verification email (the banner's "resend" button). No-op if the
+  // account is gone or already verified — and it returns the same way either
+  // way, so it leaks nothing.
+  async resendVerification(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user || user.emailVerifiedAt) return;
+    await sendVerificationEmail(user.id, user.email);
+  },
+
+  async verifyEmail(rawToken: unknown) {
+    const token = requireString(rawToken, "token", { min: 1, max: 200 });
+    const userId = await tokenRepository.consume(token, "verify");
+    if (!userId) throw new ValidationError("This verification link is invalid or has expired.");
+    await userRepository.setEmailVerified(userId);
+  },
+
+  // "Forgot password" request. ENUMERATION-SAFE: it validates the email shape
+  // but always resolves the same whether or not an account exists — only
+  // actually sending mail when there's a user. The caller returns a generic
+  // "check your inbox" regardless.
+  async requestPasswordReset(inputEmail: unknown) {
+    let email: string;
+    try {
+      email = requireEmail(inputEmail);
+    } catch {
+      return; // malformed email → behave identically to "no such user"
+    }
+    const user = await userRepository.findByEmail(email);
+    if (!user) return;
+
+    await tokenRepository.invalidateForUser(user.id, "reset");
+    const token = await tokenRepository.create(user.id, "reset", RESET_TTL_MS);
+    await sendMail({
+      to: user.email,
+      subject: "Reset your Leaflet password",
+      text:
+        `Open this link to set a new password:\n\n` +
+        `${appUrl(`/reset-password?token=${token}`)}\n\n` +
+        `The link expires in 1 hour. If you didn't request this, ignore this ` +
+        `message — your password is unchanged.`,
+    });
+  },
+
+  async resetPassword(rawToken: unknown, newPassword: unknown) {
+    const token = requireString(rawToken, "token", { min: 1, max: 200 });
+    const password = requireString(newPassword, "password", { min: 8, maxBytes: 72 });
+    const userId = await tokenRepository.consume(token, "reset");
+    if (!userId) throw new ValidationError("This reset link is invalid or has expired.");
+    const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+    await userRepository.updatePassword(userId, passwordHash);
+    // The reset means the account may have been compromised — drop EVERY
+    // session so any attacker holding one is logged out.
+    await sessionRepository.deleteAllForUser(userId);
+  },
+
+  // Authenticated password change. Verifies the current password, then keeps
+  // THIS session alive but kills every other one (a hijacked session dies).
+  async changePassword(
+    userId: string,
+    currentSessionToken: string,
+    currentPassword: unknown,
+    newPassword: unknown,
+  ) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new AuthError();
+    const current = requireString(currentPassword, "current password", { min: 1, maxBytes: 72 });
+    const ok = await bcrypt.compare(current, user.passwordHash);
+    if (!ok) throw new AuthError("Current password is incorrect");
+
+    const next = requireString(newPassword, "new password", { min: 8, maxBytes: 72 });
+    const passwordHash = await bcrypt.hash(next, BCRYPT_COST);
+    await userRepository.updatePassword(userId, passwordHash);
+    await sessionRepository.deleteAllForUserExcept(userId, hashToken(currentSessionToken));
   },
 };
 

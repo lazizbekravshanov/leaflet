@@ -29,6 +29,14 @@ export const userRepository = {
     return prisma.user.update({ where: { id }, data });
   },
 
+  updatePassword(id: string, passwordHash: string) {
+    return prisma.user.update({ where: { id }, data: { passwordHash } });
+  },
+
+  setEmailVerified(id: string) {
+    return prisma.user.update({ where: { id }, data: { emailVerifiedAt: new Date() } });
+  },
+
   // The people directory: every user plus relationship counts, now both
   // denormalized columns (follower_count from Phase 2, review_count from
   // Phase 5) — two scalar reads, no COUNT(*) subqueries at all.

@@ -12,7 +12,12 @@ export default function LoginPage() {
       <div className="mt-8 w-full">
         <AuthForm mode="login" />
       </div>
-      <p className="mt-6 text-[15px] text-ink-secondary">
+      <p className="mt-5 text-[15px] text-ink-secondary">
+        <Link href="/forgot-password" className="u-link">
+          Forgot your password?
+        </Link>
+      </p>
+      <p className="mt-3 text-[15px] text-ink-secondary">
         New here?{" "}
         <Link href="/signup" className="text-ink underline underline-offset-2 hover:text-accent">
           Create your shelf

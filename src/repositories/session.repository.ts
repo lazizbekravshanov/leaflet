@@ -20,9 +20,19 @@ export const sessionRepository = {
     return prisma.session.deleteMany({ where: { tokenHash } });
   },
 
-  // "Log out everywhere" — also the right call after a password change.
+  // "Log out everywhere" — also the right call after a password RESET (the user
+  // isn't holding a valid session anyway).
   deleteAllForUser(userId: string) {
     return prisma.session.deleteMany({ where: { userId } });
+  },
+
+  // "Log out every OTHER device" — for a password CHANGE: kill any session that
+  // isn't the one making the change (a hijacked session dies), but keep the
+  // caller signed in on this device.
+  deleteAllForUserExcept(userId: string, keepTokenHash: string) {
+    return prisma.session.deleteMany({
+      where: { userId, tokenHash: { not: keepTokenHash } },
+    });
   },
 
   // Reap this user's expired rows. Called opportunistically on login (right

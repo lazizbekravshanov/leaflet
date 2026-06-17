@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
+import { VerifyBanner } from "@/components/VerifyBanner";
 import { Footer } from "@/components/Footer";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -27,6 +28,7 @@ export default function RootLayout({
         className={`${inter.variable} ${newsreader.variable} flex min-h-svh flex-col antialiased`}
       >
         <Nav />
+        <VerifyBanner />
         {/* Bare main: pages own their containers, so the landing page can
             run full-bleed alternating sections while app pages use the
             1080px content column. */}

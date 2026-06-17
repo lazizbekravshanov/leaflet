@@ -239,6 +239,11 @@ export async function seedDemo(prisma: PrismaClient, bookIds: string[]) {
   await prisma.$executeRaw`UPDATE books SET rating_count = 0, avg_rating = NULL
      WHERE id NOT IN (SELECT DISTINCT book_id FROM ratings)`;
 
+  // Demo accounts are pre-verified so the demo feed isn't covered by the
+  // verify banner.
+  await prisma.$executeRaw`UPDATE users SET email_verified_at = now()
+     WHERE email LIKE '%@leaflet.demo'`;
+
   console.log(
     `Demo: ${users.length} users, ${reviewCount} reviews, follows/likes/comments in place.`,
   );
