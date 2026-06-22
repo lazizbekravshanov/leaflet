@@ -32,3 +32,7 @@ yarn-error.log*
 
 # prisma generated client (regenerate with `npm run db:generate`)
 /src/generated/
+
+# local Claude Code session transcripts — derived analysis artifact, may
+# contain connection strings/secrets from past sessions. Never commit.
+/claude-logs/
