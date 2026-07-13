@@ -36,3 +36,6 @@ yarn-error.log*
 # local Claude Code session transcripts — derived analysis artifact, may
 # contain connection strings/secrets from past sessions. Never commit.
 /claude-logs/
+
+# local Superpowers brainstorming companion artifacts
+/.superpowers/
